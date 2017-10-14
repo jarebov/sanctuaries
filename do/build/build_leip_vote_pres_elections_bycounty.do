@@ -16,7 +16,6 @@ global path = // Barbara path
 ************************************************************************
 
 
-
 ****************************** 2000 Presidential Election ******************************
 import excel "$path/sanctuaries/data/dave_leip_election_data/Pres_Election_Data_2000.xlsx", sheet("County") cellrange(A1:M3465) clear
 
