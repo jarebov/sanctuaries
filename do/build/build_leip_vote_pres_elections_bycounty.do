@@ -4,14 +4,14 @@
 clear all
 set more off
 
-global user = 1 // 1 Jaime, 2 Barbara
+global user = 2 // 1 Jaime, 2 Barbara
 
 if $user == 1{
 global path = "/Users/JAIME/Dropbox/research"
 }
 
 if $user == 2{
-global path = // Barbara path
+global path = "~/Dropbox/Research"
 }
 ************************************************************************
 
@@ -59,7 +59,36 @@ drop bush_vote_frac	gore_vote_frac nader_vote_frac
 
 gen year=2000
 
-order county_name state_abbrev year rep_vote_frac dem_vote_frac other_vote_frac
+rename state_abbrev state
+sort county_name state
+
+preserve
+use "$path/sanctuaries/data/output_datasets/county_fips.dta", clear
+replace county_name = "Richmond City"	if fips == "51760"
+replace county_name = "Bedford City"	if fips == "51515"
+replace county_name = "Fairfax City"	if fips == "51600"
+replace county_name = "Franklin City"	if fips == "51620"
+replace county_name = "Roanoke City"	if fips == "51770"
+replace county_name = "Carson City"		if county_name == "Carson City city"	
+replace county_name = "Baltimore City"	if county_name == "Baltimore city"	
+replace county_name = "Desoto"			if county_name == "DeSoto"	& state == "FL"
+replace county_name = "Dewitt"			if county_name == "DeWitt"	
+replace county_name = "Lac Qui Parle"	if county_name == "Lac qui Parle"
+replace county_name = "St. Louis City"	if county_name == "St. Louis city"	
+replace state = "DC" if county_name == "District of Columbia"
+drop if state == "AK"
+
+sort county_name state
+
+save "$path/temp.dta", replace
+restore
+drop if state == "AK"
+
+
+merge 1:1 county_name state using "$path/temp.dta"
+keep if _m == 3
+drop _m
+order fips county_name state year rep_vote_frac dem_vote_frac other_vote_frac
 
 save "$path/sanctuaries/data/output_datasets/pres_election_2000_bycounty.dta", replace 
 
@@ -94,6 +123,8 @@ replace county_name = "Roanoke City"	if county_name=="Roanoke"   & state_abbrev=
 replace county_name = "St. Louis City"	if county_name=="St. Louis" & state_abbrev=="MO" & inrange(kerry,.8,.81)
 replace county_name = "Baltimore City"	if county_name=="Baltimore" & state_abbrev=="MD" & inrange(kerry,.8,.85)
 
+replace county_name = "Desoto" if county_name == "DeSoto" & state == "FL"
+replace county_name = "Dewitt" if county_name == "DeWitt" & state == "TX"
 rename bush rep_vote_frac
 rename kerry dem_vote_frac
 gen other_vote_frac = nader + other
@@ -101,7 +132,14 @@ drop nader other
 
 gen year=2004
 
-order county_name state_abbrev year rep_vote_frac dem_vote_frac other_vote_frac
+drop if state == "AK"
+rename state_abbrev state
+sort county_name state
+merge 1:1 county_name state using "$path/temp.dta"
+keep if _m == 3
+drop _m
+
+order fips county_name state year rep_vote_frac dem_vote_frac other_vote_frac
 
 save "$path/sanctuaries/data/output_datasets/pres_election_2004_bycounty.dta", replace 
 
@@ -140,7 +178,16 @@ drop nader other
 
 gen year=2008
 
-order county_name state_abbrev year rep_vote_frac dem_vote_frac other_vote_frac
+replace county_name = "Desoto" if county_name == "DeSoto" & state == "FL"
+replace county_name = "Dewitt" if county_name == "DeWitt" & state == "TX"
+drop if state == "AK"
+rename state_abbrev state
+sort county_name state
+merge 1:1 county_name state using "$path/temp.dta"
+keep if _m == 3
+drop _m
+
+order fips county_name state year rep_vote_frac dem_vote_frac other_vote_frac
 
 save "$path/sanctuaries/data/output_datasets/pres_election_2008_bycounty.dta", replace 
 
@@ -179,7 +226,22 @@ rename other other_vote_frac
 
 gen year=2012
 
-order county_name state_abbrev year rep_vote_frac dem_vote_frac other_vote_frac
+replace county_name = "Desoto" if county_name == "DeSoto" & state == "FL"
+replace county_name = "Dewitt" if county_name == "DeWitt" & state == "TX"
+drop if state == "AK"
+rename state_abbrev state
+sort county_name state
+merge 1:1 county_name state using "$path/temp.dta"
+keep if _m == 3
+drop _m
 
-save "$path/sanctuaries/data/output_datasets/pres_election_2012_bycounty.dta", replace 
+order fips county_name state year rep_vote_frac dem_vote_frac other_vote_frac
+
+foreach y in 2000 2004 2008 {
+append using "$path/sanctuaries/data/output_datasets/pres_election_`y'_bycounty.dta"
+rm "$path/sanctuaries/data/output_datasets/pres_election_`y'_bycounty.dta"
+}
+sort fips year
+
+save "$path/sanctuaries/data/output_datasets/pres_election_bycounty.dta", replace 
 
