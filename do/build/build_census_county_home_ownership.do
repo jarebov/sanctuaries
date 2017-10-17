@@ -4,14 +4,14 @@
 clear all
 set more off
 
-global user = 1 // 1 Jaime, 2 Barbara
+global user = 2 // 1 Jaime, 2 Barbara
 
 if $user == 1{
 global path = "/Users/JAIME/Dropbox/research"
 }
 
 if $user == 2{
-global path = // Barbara path
+global path = "~/Dropbox/Research"
 }
 ************************************************************************
 
@@ -86,7 +86,8 @@ sort county_fips year
 label var home_own_frac "home ownership rate - census SF100% 2000 and 2010"
 
 
-
+rename county_fips fips
+destring fips, replace
 save "$path/sanctuaries/data/output_datasets/home_ownership_bycounty_2000_2010.dta", replace
 
 

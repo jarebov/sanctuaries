@@ -6,7 +6,7 @@
 clear all
 set more off
 
-global user = 1 // 1 Jaime, 2 Barbara
+global user = 2 // 1 Jaime, 2 Barbara
 
 
 
@@ -15,7 +15,7 @@ global path = "/Users/JAIME/Dropbox/research"
 }
 
 if $user == 2{
-global path = // Barbara path
+global path = "~/Dropbox/Research"
 }
 ************************************************************************
 use "$path/sanctuaries/data/EqualityOfOpportunity/online_table4.dta", clear
@@ -48,5 +48,5 @@ keep cty2000 county_name state_id stateabbrv statename cs_race_theil_2000	cs00_s
 		frac_worked1416	mig_inflow	mig_outflow	cs_born_foreign	rel_tot	cs_fam_wkidsinglemom	///
 		med_rent_am	med_rent_bm	med_house_price_am	med_house_price_bm
 		
-		
+rename 	cty2000 fips	
 save "$path/sanctuaries/data/output_datasets/EOP_county_covariates.dta", replace		

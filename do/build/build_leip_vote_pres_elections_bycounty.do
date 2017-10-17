@@ -241,6 +241,7 @@ foreach y in 2000 2004 2008 {
 append using "$path/sanctuaries/data/output_datasets/pres_election_`y'_bycounty.dta"
 rm "$path/sanctuaries/data/output_datasets/pres_election_`y'_bycounty.dta"
 }
+destring fips, replace
 sort fips year
 
 save "$path/sanctuaries/data/output_datasets/pres_election_bycounty.dta", replace 
