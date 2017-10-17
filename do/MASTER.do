@@ -14,7 +14,7 @@ global path = "/Users/JAIME/Dropbox/research"
 }
 
 if $user == 2{
-global path = // Barbara path
+global path = "~/Dropbox/Research"// Barbara path
 }
 ************************************************************************
 
@@ -49,4 +49,6 @@ run "$build_do/match_icedetainer_countyid.do"// matches raw data from ICE detain
 
 run "$build_do/clean_countyborder.do"	//cleans county_border files
 
-***************************************************************************
+***************** 	MERGE DATA	*********************************
+run "$build_do/build_panel_covariates.do" // generates panel of covariates from different sources
+run "$build_do/build_treat_control.do"		// generates panel of treatment and control using adjacency files and differen treatment definitions
