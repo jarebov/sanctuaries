@@ -35,6 +35,8 @@ merge m:1 fips using landarea.dta
 drop _m
 merge 1:1 fips year using population.dta
 drop _m
+merge 1:1 fips year using pop_byrace.dta
+drop _m
 merge 1:1 fips year using saipe.dta
 drop _m
 merge 1:1 fips year using wkage_pop.dta
