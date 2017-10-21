@@ -49,7 +49,7 @@ drop if stateabbr == ""
 
 ** merge treatment nr. 1: county detainer
 sort fips
-merge 1:1 fips using treat_control.dta	
+merge 1:m fips using treat_control.dta	
 gen other = _m == 1
 drop _m
 
@@ -75,19 +75,38 @@ label variable homeown 				"home ownership rate (2000)"
 label variable medianinc 			"median income (2010)"
 label variable treat 				"no ICE detainer"
 
-** Tables
+capture log close
+log using "$out/balance.log", replace
+
+** Table of simple comparisons of treated vs border, weighted by population 
+gen weight = tot_pop / nr_border 
+
 eststo s1: estpost tabstat	pop_density wkage_share lf_participation mig_in_rate mig_out_rate democratic share_black 		///
 							share_hisp u_rate gini ccd_exp_tot ccd_pup_tch_ratio score_r dropout_r cs_born_foreign 			///
-							rel_tot cs_fam_wkidsinglemom homeown median, by(treat) statistics(mean sd) columns(statistics) listwise
+							rel_tot cs_fam_wkidsinglemom homeown median [aw = weight], by(treat) statistics(mean sd) columns(statistics) listwise
 esttab s1 using $out/balance_noICE_border.doc, main(mean a3) aux(sd a3) nostar unstack nonote label replace noisily nogaps
 
-eststo t1: estpost ttest pop_density wkage_share lf_participation mig_in_rate mig_out_rate democratic share_black 		///
+foreach var in pop_density wkage_share lf_participation mig_in_rate mig_out_rate democratic share_black 		///
 							share_hisp u_rate gini ccd_exp_tot ccd_pup_tch_ratio score_r dropout_r cs_born_foreign 			///
-							rel_tot cs_fam_wkidsinglemom homeown median, by(treat) 
-esttab t1 using $out/balance_noICE_border.doc,  append se star (* 0.1 ** 0.05 *** 0.01) label
+							rel_tot cs_fam_wkidsinglemom homeown median {
+reg `var' treat [aw = weight]
+}
+
+* using border FE				
+				
+foreach var in pop_density wkage_share lf_participation mig_in_rate mig_out_rate democratic share_black 		///
+							share_hisp u_rate gini ccd_exp_tot ccd_pup_tch_ratio score_r dropout_r cs_born_foreign 			///
+							rel_tot cs_fam_wkidsinglemom homeown median {
+areg `var' treat [aw = weight], a(border_id) cluster(border_id)
+}
+
 
 
 ** Tables
+preserve
+drop *border*
+duplicates drop
+tab treat // check it's equal to 91 for treat == 1
 gen treat2 = treat
 replace treat2 = 0 if other == 1
 eststo s1: estpost tabstat	pop_density wkage_share lf_participation mig_in_rate mig_out_rate democratic share_black 		///
@@ -95,7 +114,9 @@ eststo s1: estpost tabstat	pop_density wkage_share lf_participation mig_in_rate 
 							rel_tot cs_fam_wkidsinglemom homeown, by(treat2) statistics(mean sd) columns(statistics) listwise
 esttab s1 using $out/balance_noICE_all.doc, main(mean a3) aux(sd a3) nostar unstack nonote label replace noisily nogaps
 
-eststo t1: estpost ttest pop_density wkage_share lf_participation mig_in_rate mig_out_rate democratic share_black 		///
+foreach var in pop_density wkage_share lf_participation mig_in_rate mig_out_rate democratic share_black 		///
 							share_hisp u_rate gini ccd_exp_tot ccd_pup_tch_ratio score_r dropout_r cs_born_foreign 			///
-							rel_tot cs_fam_wkidsinglemom homeown, by(treat2) 
-esttab t1 using $out/balance_noICE_all.doc,  append se star (* 0.1 ** 0.05 *** 0.01)
+							rel_tot cs_fam_wkidsinglemom homeown median {
+reg `var' treat2 [aw = tot_pop]
+}
+log close

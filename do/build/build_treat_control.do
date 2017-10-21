@@ -35,19 +35,37 @@ drop _m
 keep fips adj_fips*
 reshape long adj_fips, i(fips) j(n)
 drop if adj_fips == .
-bysort fips: gen nr_borders = _N
+egen border_id = group(fips adj_fips)
+
 preserve
-keep fips nr
+keep fips border_id
 duplicates drop
 save treat.dta, replace
 restore
-keep adj_fips
+
+keep adj_fips border_id
+
 duplicates drop
 rename adj fips
 sort fips
-merge 1:1 fips using treat.dta
+gen treat = 0
+/*
+merge m:m fips using treat.dta
 gen treat = _m == 2 | _m == 3
 drop _m
+*/
+append using treat.dta
+replace treat = 1 if treat == .
+
+* note: the following takes care of the fact that some treated counties border with other treated counties, and are therefore counted twice.
+duplicates tag fips border_id, gen(tag)
+drop if tag > 0 & treat == 0
+bysort border_id: gen T = _N
+drop if T == 1
+
+* generate number of borders
+bysort fips: gen nr_borders = _N
+
 sort fips
 save treat_control.dta, replace
 rm treat.dta
