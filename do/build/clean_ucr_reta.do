@@ -1,4 +1,4 @@
-** Build UCR Return A Files from raw data
+** Build UCR Return A Files from raw data (read and save same raw data in Stata format)
 
 ************************************************************************
 clear all
@@ -101,7 +101,7 @@ qui infix	///
 	str	retid 			1-1		///
 	str	statecode		2-3		///
 	str	oricode			4-10	/// 
-    str	gruop			11-12	///
+    str	group			11-12	///
 	str	division		13-13	///
     str	year			14-15	///
     str	seqnum			16-20	///

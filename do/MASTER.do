@@ -51,6 +51,15 @@ run "$build_do/match_icedetainer_countyid.do"// matches raw data from ICE detain
 *Crime:
 run "$build_do/build_urc_annual.do"	//build an annual county panel dataset with URC crime data from NACJD
 
+run "$build_do/clean_ucr_crosswalks.do"	//build UCR crosswalks (to fips codes, and other variables)
+
+run "$build_do/clean_ucr_reta.do" //compile UCR monthly Return A from raw data into Stata raw data version (year by year)
+run "$build_do/build_arrests_file.do" // elaborates those yearly raw files and generates a county-month-year file with total arrests
+
+run "$build_do/clean_ucr_asr.do" //compile UCR monthly ASR from raw data into Stata raw data version (year by year)
+run "$build_do/build_offense_file.do" // elaborates those yearly raw files and generates a county-month-year file with total arrests
+
+
 ******************
 
 
