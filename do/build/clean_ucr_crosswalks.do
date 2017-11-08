@@ -22,6 +22,9 @@ if $user == 2{
 **************************			/*2012*/
 import delimited "$path/sanctuaries/data/UCR_FBI/crosswalks/cw_2012/ICPSR_35158/ICPSR_35158/DS0001/35158-0001-Data.tsv", clear
 
+drop if ori7=="-1" //our link variable. missing when duplicate ORI, with 9 digit code
+isid ori7
+
 save "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2012.dta", replace 
 
 
@@ -32,6 +35,9 @@ rename LAT INTPTLAT
 rename LONG INTPTLONG
 
 rename *, lower
+
+drop if ori7=="" //our link variable. missing when duplicate ORI, with 9 digit code
+isid ori7
 
 save "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2005.dta", replace 
 
@@ -83,6 +89,12 @@ qui infix	///
 	str hqcode	720-727	///
 	str source	728-728	///
 	using "$path/sanctuaries/data/UCR_FBI/crosswalks/cw_2000/ICPSR_04082/ICPSR_04082/DS0001/04082-0001-Data.txt", clear
+	
+drop if ori7=="" //our link variable. missing when duplicate ORI, with 9 digit code
+isid ori7
+
+destring fcounty, replace
+destring fstate, replace
 
 save "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2000.dta", replace 	
 	
@@ -91,11 +103,57 @@ save "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2000.dta", replace
 	
 	
 	
+/*It turns out that 2012 encompasses the older versions. It still misses some
+	agencies though, when matching to Reta 2000-2012. I coded manually the fips
+	state and county codes for this ~26 instances or so. let's combine
+	2012 with the manually added to have a comprehensive crosswalk for the
+	years 2000-2012 (2013 onwards is a different matter)*/	
+	
+import excel "$path/sanctuaries/data/UCR_FBI/crosswalks/cw_handmade_missing_cases2012.xlsx", sheet("Sheet1") firstrow clear
+	
+append using 	"$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2012.dta"
+isid ori7
+
+save "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2012_expanded.dta", replace 
+
+
+
+
+
+
+/*Years 2013 onwards*/
+
+/* ICPSR latest crosswalk is 2012. Since then new agencies have arised, and thus when 
+	matching the 2012 crosswalk to later UCR years, there are numerous observations which
+	are not matched. However, I can use the 2012 matches to create another crosswalk, that 
+	instead of using ORICODE (ORI7) as linking variable, uses the UCR state and county codes
+	and links it to the relevant FIPS codes*/
+
+use "$path/sanctuaries/data/UCR_FBI/UCR_master_file/work/reta2012.dta", clear
+
+gen ori7=oricode //for merge
+*drop Virgin Islands, American Samoa, Puerto Rico, Guam, Panama canal:
+drop if statecode=="62" | statecode=="54" |statecode=="52" | statecode=="53" | statecode=="55"
+
+merge 1:1 ori7 using "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2012_expanded.dta"
+drop _merge
+
+drop if popd1county==""
+
+
+collapse (median) fstate (median) fcounty , by(statecode popd1county)
+isid statecode popd1county
+
+save "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_2013onwards.dta", replace 
+
+
+
+
+
 	
 	
 	
-	
-	
+
 	
 	
 	

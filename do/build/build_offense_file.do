@@ -20,11 +20,19 @@ if $user == 2{
 }
 **************************
 
-use "$path/sanctuaries/data/UCR_FBI/UCR_master_file/work/reta2007.dta"
+*foreach y of numlist 2000/2008 2010/2016{
 
+local y = 2007
+
+use "$path/sanctuaries/data/UCR_FBI/UCR_master_file/work/reta`y'.dta", clear
+
+*keep only "Number of Actual Offenses"
+drop cod*_c0_m*
+drop cod*_c2_m*
+drop cod*_c3_m*
 
 *destring all offense counts:
-foreach c in 0 1 2 3{
+foreach c in 1 {
 	foreach k of numlist 1/28{
 		foreach m of numlist 1/12{
 
@@ -108,79 +116,125 @@ foreach m of numlist 1/12{
 	}
 }
 
-** Generate state fips
+
 *drop Virgin Islands, American Samoa, Puerto Rico, Guam, Panama canal:
 drop if statecode=="62" | statecode=="54" |statecode=="52" | statecode=="53" | statecode=="55"
-gen state_fips = ""
-replace state_fips =	"02"	if statecode ==	"50"	
-replace state_fips =	"01"	if statecode ==	"01"	
-replace state_fips =	"05"	if statecode ==	"03"	
-replace state_fips =	"04"	if statecode ==	"02"	
-replace state_fips =	"06"	if statecode ==	"04"	
-replace state_fips =	"08"	if statecode ==	"05"	
-replace state_fips =	"09"	if statecode ==	"06"	
-replace state_fips =	"11"	if statecode ==	"08"	
-replace state_fips =	"10"	if statecode ==	"07"	
-replace state_fips =	"12"	if statecode ==	"09"	
-replace state_fips =	"13"	if statecode ==	"10"	
-replace state_fips =	"15"	if statecode ==	"51"	
-replace state_fips =	"19"	if statecode ==	"14"	
-replace state_fips =	"16"	if statecode ==	"11"	
-replace state_fips =	"17"	if statecode ==	"12"	
-replace state_fips =	"18"	if statecode ==	"13"	
-replace state_fips =	"20"	if statecode ==	"15"	
-replace state_fips =	"21"	if statecode ==	"16"	
-replace state_fips =	"22"	if statecode ==	"17"	
-replace state_fips =	"25"	if statecode ==	"20"	
-replace state_fips =	"24"	if statecode ==	"19"	
-replace state_fips =	"23"	if statecode ==	"18"	
-replace state_fips =	"26"	if statecode ==	"21"	
-replace state_fips =	"27"	if statecode ==	"22"	
-replace state_fips =	"29"	if statecode ==	"24"	
-replace state_fips =	"28"	if statecode ==	"23"	
-replace state_fips =	"30"	if statecode ==	"25"	
-replace state_fips =	"37"	if statecode ==	"32"	
-replace state_fips =	"38"	if statecode ==	"33"	
-replace state_fips =	"31"	if statecode ==	"26"	
-replace state_fips =	"33"	if statecode ==	"28"	
-replace state_fips =	"34"	if statecode ==	"29"	
-replace state_fips =	"35"	if statecode ==	"30"	
-replace state_fips =	"32"	if statecode ==	"27"	
-replace state_fips =	"36"	if statecode ==	"31"	
-replace state_fips =	"39"	if statecode ==	"34"	
-replace state_fips =	"40"	if statecode ==	"35"	
-replace state_fips =	"41"	if statecode ==	"36"	
-replace state_fips =	"42"	if statecode ==	"37"	
-replace state_fips =	"44"	if statecode ==	"38"	
-replace state_fips =	"45"	if statecode ==	"39"	
-replace state_fips =	"46"	if statecode ==	"40"	
-replace state_fips =	"47"	if statecode ==	"41"	
-replace state_fips =	"48"	if statecode ==	"42"	
-replace state_fips =	"49"	if statecode ==	"43"	
-replace state_fips =	"51"	if statecode ==	"45"	
-replace state_fips =	"50"	if statecode ==	"44"	
-replace state_fips =	"53"	if statecode ==	"46"	
-replace state_fips =	"55"	if statecode ==	"48"	
-replace state_fips =	"54"	if statecode ==	"47"	
-replace state_fips =	"56"	if statecode ==	"49"
-
 
 
 **Destring year
 replace year = "20"+year
 destring year, replace
+assert year==`y'
+
+
+** merge state and county FIPS
+gen ori7 = oricode //for merge 2000-2012
+
+
+/* This was done to check the missing crosswalk values 2000-2012
+preserve
+
+	keep if _merge==1
+	keep ori7 statecode popd1county mailadline1 mailadline2 mailadline3 mailadline4
+	save "$path/sanctuaries/data/temp/merge1_`y'.dta", replace
+restore
+*/
+
+local y=2007
+if inrange(`y',2000,2012) {
+	merge 1:1 ori7 using "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2012_expanded.dta", keepusing(fstate fcounty)
+	drop if _merge==2
+	drop _merge
+}
+
+
+
+if inrange(`y',2013,2016) {
+	*two- step procedure using 2012 crosswalk and then the generated corsswalk
+}
+
+
+*generate unique county FIPS code (combining state and county)
+tostring fstate, replace
+replace fstate = "0" + fstate if strlen(fstate)==1
+
+tostring fcounty, replace
+replace fcounty = "0" + fcounty if strlen(fcounty)==2
+replace fcounty = "00" + fcounty if strlen(fcounty)==1
+
+gen fips = fstate + fcounty
+
+
+
 
 
 /*Month Included In: Used only if an agency does not submit a return, say for January, 
 	but indicates on the February return that it includes the January data. In this case,
 	the January area would have "02" in this field with the remainder of the month data
 	initialized to field defaults of zeros and blanks, as applicable*/
+	
+/*---> if say, the data for January is recorded in February, assign both February and
+		January as value for each crime equal to February/2  */	
+
+foreach m of numlist 1/12{
+	destring monthinclin_m`m', replace
+}
+
+foreach j of numlist 1/12{ 
+	foreach k of numlist 1/12{ 
+		gen rec_k`k'_j`j'=0
+		replace rec_k`k'_j`j'=1 if monthinclin_m`k'==`j' // = 1 if data from month k is recorded in month j
+	
+	}
+}
+
+*number of months k whose data is recorded in month j
+foreach j of numlist 1/12{
+	egen rec_j`j'_occurrence = rowtotal(rec_k1_j`j' rec_k2_j`j' rec_k3_j`j' rec_k4_j`j' rec_k5_j`j' rec_k6_j`j' rec_k7_j`j' rec_k8_j`j' rec_k9_j`j' rec_k10_j`j' rec_k11_j`j' rec_k12_j`j')
+}
+
+
+/*for each offense, for each month, generate new variable that divides the number of offenses
+ by the actual number of months it is capturing (monthinclin + 1)*/
+
+ foreach c of numlist 1/28{ //number of offenses
+	foreach j of numlist 1/12{ //number of months
+		gen cod`c'_c1_norm_m`j' = cod`c'_c1_m`j'
+		replace cod`c'_c1_norm_m`j' = cod`c'_c1_m`j'/(rec_j`j'_occurrence+1) if rec_j`j'_occurrence>=1
+	}
+} 
+ 
+/*now, assign that value to the rest of the relevant months*/
+foreach c of numlist 1/28{ //number of offenses
+	foreach k of numlist 1/12{ //number of months for potential change
+		foreach j of numlist 1/12{ //number of potential months where actual data is recorded
+			replace cod`c'_c1_norm_m`k' = cod`c'_c1_norm_m`j' if rec_k`k'_j`j'==1
+		}
+	}
+}
+
+drop rec_k*_j* rec_j*_occurrence
+keep year oricode fips cod*_c1_m* cod*_c1_norm_m*
+
+
+
+/*Reshape to long form, monthly panel*/
+reshape long 	cod1_c1_m 	cod1_c1_norm_m 	cod2_c1_m 	cod2_c1_norm_m 	cod3_c1_m 	cod3_c1_norm_m ///
+				cod4_c1_m 	cod4_c1_norm_m 	cod5_c1_m 	cod5_c1_norm_m 	cod6_c1_m 	cod6_c1_norm_m ///
+				cod7_c1_m 	cod7_c1_norm_m 	cod8_c1_m 	cod8_c1_norm_m 	cod9_c1_m 	cod9_c1_norm_m ///
+				cod10_c1_m 	cod10_c1_norm_m cod11_c1_m 	cod11_c1_norm_m cod12_c1_m 	cod12_c1_norm_m ///
+				cod13_c1_m 	cod13_c1_norm_m cod14_c1_m 	cod14_c1_norm_m cod15_c1_m 	cod15_c1_norm_m ///
+				cod16_c1_m 	cod16_c1_norm_m cod17_c1_m 	cod17_c1_norm_m cod18_c1_m 	cod18_c1_norm_m ///
+				cod19_c1_m 	cod19_c1_norm_m cod20_c1_m 	cod20_c1_norm_m cod21_c1_m 	cod21_c1_norm_m ///
+				cod22_c1_m 	cod22_c1_norm_m cod23_c1_m 	cod23_c1_norm_m cod24_c1_m 	cod24_c1_norm_m ///
+				cod25_c1_m 	cod25_c1_norm_m cod26_c1_m 	cod26_c1_norm_m cod27_c1_m 	cod27_c1_norm_m ///
+				cod28_c1_m 	cod28_c1_norm_m, i(oricode) j(month)
 
 
 
 
 
-
+collapse (sum) cod*_c1_m cod*_c1_norm_m, by(fips month)
 
 
 
