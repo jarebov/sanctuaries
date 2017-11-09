@@ -26,6 +26,17 @@ local y = 2007
 
 use "$path/sanctuaries/data/UCR_FBI/UCR_master_file/work/reta`y'.dta", clear
 
+
+*drop Virgin Islands, American Samoa, Puerto Rico, Guam, Panama canal:
+drop if statecode=="62" | statecode=="54" |statecode=="52" | statecode=="53" | statecode=="55"
+
+
+/*Drop agencies that do not submit records directly. (If an agency did not submit its
+	records directly -perhaps because of small size- the variable coveredby records
+	the ORI of the agency through which it submitted its crime reports)		
+	I have checked and all crimes are practically zero for those agencies covered by someone else*/					
+drop if coveredby!=""
+
 *keep only "Number of Actual Offenses"
 drop cod*_c0_m*
 drop cod*_c2_m*
@@ -79,7 +90,7 @@ foreach c in 1 {
 		
 		
 		destring cod`k'_c`c'_m`m', replace force
-		
+		replace cod`k'_c`c'_m`m'=. if cod`k'_c`c'_m`m'==999 | cod`k'_c`c'_m`m'==9999 //means missing according to Maltz & Weiss (2006)
 		/*
 		drop notnumeric
 		*/
@@ -112,13 +123,11 @@ foreach m of numlist 1/12{
 		
 		
 		destring `v'`m', replace force
+		replace `v'`m'=. if `v'`m'==999|`v'`m'==9999
 	
 	}
 }
 
-
-*drop Virgin Islands, American Samoa, Puerto Rico, Guam, Panama canal:
-drop if statecode=="62" | statecode=="54" |statecode=="52" | statecode=="53" | statecode=="55"
 
 
 **Destring year
@@ -168,6 +177,107 @@ gen fips = fstate + fcounty
 
 
 
+/*Sum up the seven index crimes for each agency and each year*/
+
+*drop the other crimes and subcrime categories:
+foreach c in 2 4 5 7 8 9 10 12 13 14 15 16 18 19 20 22 24 25 26 27 28{
+	drop cod`c'_c1_m*
+}
+
+*sum up the remaining seven for each month
+foreach m of numlist 1/12{
+	egen codtot_m`m' = rowtotal(cod1_c1_m`m' cod3_c1_m`m' cod6_c1_m`m' cod11_c1_m`m' cod17_c1_m`m' cod21_c1_m`m' cod23_c1_m`m')
+}
+
+
+
+							/*Missing data issues*/
+
+*drop agencies that in a given year they don't report crime on ANY month
+drop if codtot_m1<=0 & codtot_m2<=0 & codtot_m3<=0 & codtot_m4<=0 & codtot_m5<=0 ///
+		& codtot_m6<=0 & codtot_m7<=0 & codtot_m8<=0 & codtot_m9<=0 & codtot_m10<=0 ///
+		& codtot_m11<=0 & codtot_m12<=0
+
+
+/*number with positive reporting and reporting pattern*/
+foreach m of numlist 1/12{
+
+	gen d`m'=0
+	replace d`m'=1 if codtot_m`m'>0
+	
+	tostring d`m', gen(d`m's)
+}		
+
+gen rep_number = d1 + d2 + d3 + d4 + d5 + d6 + d7 + d8 + d9 + d10 + d11 + d12
+gen rep_pattern = d1s + d2s + d3s + d4s + d5s + d6s + d7s + d8s + d9s + d10s + d11s + d12s
+
+
+*categorize into annual
+gen rep_annual=0
+replace rep_annual=1 if rep_pattern=="000000000001"
+
+*categorize into biannual
+gen rep_biannual=0
+replace rep_biannual=1 if rep_pattern=="000001000001"
+
+
+*categorize into quarterly
+gen rep_quarterly=0
+replace rep_quarterly=1 if rep_pattern=="001001001001"
+
+
+******impute average values for relevant months for agencies cateogrized as annual, biannual, and quarterly:
+
+*generate relevant division values
+foreach c in 1 3 6 11 17 21 23{ //7 index crimes
+	foreach d in 3 6 12{ //number to divide by
+		foreach m in 3 6 9 12{ //reference month
+			gen cod`c'_c1_m`m'_d`d' = cod`c'_c1_m`m'/`d'
+		}
+	}
+	
+}
+
+*generate new imputed variable version for each crime
+foreach m of numlist 1/12{
+
+	foreach c in 1 3 6 11 17 21 23{
+
+		gen cod`c'_c1_i_m`m' =  cod`c'_c1_m`m'
+		
+		* reported annually:
+		replace cod`c'_c1_i_m`m' = cod`c'_c1_m12_d12 if rep_annual==1
+		
+		*reported biannually:
+		if inrange(`m',1,6){
+			replace cod`c'_c1_i_m`m' = cod`c'_c1_m6_d6 if rep_biannual==1
+		}
+		if inrange(`m',7,12){
+			replace cod`c'_c1_i_m`m' = cod`c'_c1_m12_d6 if rep_biannual==1
+		}
+		
+		*reported quarterly:
+		if inrange(`m',1,3){
+			replace cod`c'_c1_i_m`m' = cod`c'_c1_m3_d3 if rep_quarterly==1
+		}
+		if inrange(`m',4,6){
+			replace cod`c'_c1_i_m`m' = cod`c'_c1_m6_d3 if rep_quarterly==1
+		}
+		if inrange(`m',6,9){
+			replace cod`c'_c1_i_m`m' = cod`c'_c1_m9_d3 if rep_quarterly==1
+		}
+		if inrange(`m',10,12){
+			replace cod`c'_c1_i_m`m' = cod`c'_c1_m12_d3 if rep_quarterly==1
+		}
+	}
+	egen codtot_i_m`m' = rowtotal(cod1_c1_i_m`m' cod3_c1_i_m`m' cod6_c1_i_m`m' cod11_c1_i_m`m' cod17_c1_i_m`m' cod21_c1_i_m`m' cod23_c1_i_m`m')
+		
+}
+
+
+
+ 
+/*
 /*Month Included In: Used only if an agency does not submit a return, say for January, 
 	but indicates on the February return that it includes the January data. In this case,
 	the January area would have "02" in this field with the remainder of the month data
@@ -214,75 +324,17 @@ foreach c of numlist 1/28{ //number of offenses
 }
 
 drop rec_k*_j* rec_j*_occurrence
-keep year oricode fips cod*_c1_m* cod*_c1_norm_m*
+*/
+
 
 
 
 /*Reshape to long form, monthly panel*/
-reshape long 	cod1_c1_m 	cod1_c1_norm_m 	cod2_c1_m 	cod2_c1_norm_m 	cod3_c1_m 	cod3_c1_norm_m ///
-				cod4_c1_m 	cod4_c1_norm_m 	cod5_c1_m 	cod5_c1_norm_m 	cod6_c1_m 	cod6_c1_norm_m ///
-				cod7_c1_m 	cod7_c1_norm_m 	cod8_c1_m 	cod8_c1_norm_m 	cod9_c1_m 	cod9_c1_norm_m ///
-				cod10_c1_m 	cod10_c1_norm_m cod11_c1_m 	cod11_c1_norm_m cod12_c1_m 	cod12_c1_norm_m ///
-				cod13_c1_m 	cod13_c1_norm_m cod14_c1_m 	cod14_c1_norm_m cod15_c1_m 	cod15_c1_norm_m ///
-				cod16_c1_m 	cod16_c1_norm_m cod17_c1_m 	cod17_c1_norm_m cod18_c1_m 	cod18_c1_norm_m ///
-				cod19_c1_m 	cod19_c1_norm_m cod20_c1_m 	cod20_c1_norm_m cod21_c1_m 	cod21_c1_norm_m ///
-				cod22_c1_m 	cod22_c1_norm_m cod23_c1_m 	cod23_c1_norm_m cod24_c1_m 	cod24_c1_norm_m ///
-				cod25_c1_m 	cod25_c1_norm_m cod26_c1_m 	cod26_c1_norm_m cod27_c1_m 	cod27_c1_norm_m ///
-				cod28_c1_m 	cod28_c1_norm_m, i(oricode) j(month)
+reshape long cod1_c1_m cod3_c1_m cod6_c1_m cod11_c1_m cod17_c1_m cod21_c1_m cod23_c1_m ///
+				cod1_c1_i_m cod3_c1_i_m cod6_c1_i_m cod11_c1_i_m cod17_c1_i_m cod21_c1_i_m cod23_c1_i_m ///
+				codtot_m codtot_i_m ///
+			, i(oricode) j(month)
 
 
+collapse (sum) cod*_c1_m cod*_c1_i_m codtot_m codtot_i_m, by(fips month)
 
-
-
-collapse (sum) cod*_c1_m cod*_c1_norm_m, by(fips month)
-
-
-
-/*
-
-
-
-
-
-
-
-
-
-* reshape in month form
-keep oricode state cod*
-gen id = _n
-reshape long	cod1_c0_m cod2_c0_m cod3_c0_m cod4_c0_m cod5_c0_m cod6_c0_m cod7_c0_m	 		///
-				cod8_c0_m cod9_c0_m cod10_c0_m cod11_c0_m cod12_c0_m cod13_c0_m cod14_c0_m 		///
-				cod15_c0_m cod16_c0_m cod17_c0_m cod18_c0_m cod19_c0_m cod20_c0_m cod21_c0_m 	///
-				cod22_c0_m cod23_c0_m cod24_c0_m cod25_c0_m cod26_c0_m cod27_c0_m cod28_c0_m	///
-				cod1_c1_m cod2_c1_m cod3_c1_m cod4_c1_m cod5_c1_m cod6_c1_m cod7_c1_m	 		///
-				cod8_c1_m cod9_c1_m cod10_c1_m cod11_c1_m cod12_c1_m cod13_c1_m cod14_c1_m 		///
-				cod15_c1_m cod16_c1_m cod17_c1_m cod18_c1_m cod19_c1_m cod20_c1_m cod21_c1_m 	///
-				cod22_c1_m cod23_c1_m cod24_c1_m cod25_c1_m cod26_c1_m cod27_c1_m cod28_c1_m	///
-				cod1_c2_m cod2_c2_m cod3_c2_m cod4_c2_m cod5_c2_m cod6_c2_m cod7_c2_m	 		///
-				cod8_c2_m cod9_c2_m cod10_c2_m cod11_c2_m cod12_c2_m cod13_c2_m cod14_c2_m 		///
-				cod15_c2_m cod16_c2_m cod17_c2_m cod18_c2_m cod19_c2_m cod20_c2_m cod21_c2_m 	///
-				cod22_c2_m cod23_c2_m cod24_c2_m cod25_c2_m cod26_c2_m cod27_c2_m cod28_c2_m	///
-				cod1_c3_m cod2_c3_m cod3_c3_m cod4_c3_m cod5_c3_m cod6_c3_m cod7_c3_m	 		///
-				cod8_c3_m cod9_c3_m cod10_c3_m cod11_c3_m cod12_c3_m cod13_c3_m cod14_c3_m 		///
-				cod15_c3_m cod16_c3_m cod17_c3_m cod18_c3_m cod19_c3_m cod20_c3_m cod21_c3_m 	///
-				cod22_c3_m cod23_c3_m cod24_c3_m cod25_c3_m cod26_c3_m cod27_c3_m cod28_c3_m	///
-				, i(id) j(month)
-drop id
-gen id = _n
-rename cod*_c*_m cod*_c*
-
-reshape long	cod1_c cod2_c cod3_c cod4_c cod5_c cod6_c cod7_c	 		///
-				cod8_c cod9_c cod10_c cod11_c cod12_c cod13_c cod14_c 		///
-				cod15_c cod16_c cod17_c cod18_c cod19_c cod20_c cod21_c 	///
-				cod22_c cod23_c cod24_c cod25_c cod26_c cod27_c cod28_c	///
-				, i(id) j(result)	
-				
-drop id
-gen id = _n
-rename cod*_c cod*
-forvalues n = 1 / 28{
-destring cod`n', replace force
-}
-
-egen offense = rowsum(cod1 cod2 cod3 cod4 cod5 cod6 cod7 cod8 cod9 cod10 cod11 cod12 cod13 cod14 cod15 cod16 cod17 cod18 cod19 cod20 cod21 cod22 cod23 cod24 cod25 cod26 cod27 cod28)				

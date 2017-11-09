@@ -19,10 +19,21 @@ use "UCR_FBI/UCR_master_file/work/arrest_total`yr'.dta", clear
 
 ** 
 destring arrestcounter*, replace force
-gen arrest_total = 0
+
+* calculate total arrests. delete source of duplicates (race/ethnicity) be left with age, and sum
+
 forvalues n = 1/56 {
-replace arrest_total = arrest_total + arrestcounter_`n' if arrestcounter_`n' != .
+replace arrestcounter_`n' = . if arrestcode_`n' == "053" | arrestcode_`n' == "054" |  arrestcode_`n' == "055" | arrestcode_`n' == "056"
 }
+
+egen arrest_total =  rowtotal(arrestcounter_1 arrestcounter_2 arrestcounter_3 arrestcounter_4 arrestcounter_5 arrestcounter_6 arrestcounter_7  arrestcounter_8  arrestcounter_9  arrestcounter_10 ///
+							arrestcounter_11 arrestcounter_12 arrestcounter_13 arrestcounter_14 arrestcounter_15 arrestcounter_16 arrestcounter_17  arrestcounter_18  arrestcounter_19  arrestcounter_20 ///
+							arrestcounter_21 arrestcounter_22 arrestcounter_23 arrestcounter_24 arrestcounter_25 arrestcounter_26 arrestcounter_27  arrestcounter_28  arrestcounter_29  arrestcounter_30 ///
+							arrestcounter_31 arrestcounter_32 arrestcounter_33 arrestcounter_34 arrestcounter_35 arrestcounter_36 arrestcounter_37  arrestcounter_38  arrestcounter_39  arrestcounter_40 ///
+							arrestcounter_41 arrestcounter_42 arrestcounter_43 arrestcounter_44 arrestcounter_45 arrestcounter_46 arrestcounter_47  arrestcounter_48  arrestcounter_49  arrestcounter_50 ///
+							arrestcounter_51 arrestcounter_52 arrestcounter_53 arrestcounter_54 arrestcounter_55 arrestcounter_56)
+							
+drop arrestcounter* arrestcode*
 
 ** Generate state fips
 gen state_fips = ""
@@ -81,7 +92,7 @@ replace state_fips =	"56"	if statecode ==	"49"
 gen fips = state_fips + county if county != "0"
 drop if county == "0" | county == "" | month == ""
 destring population, replace force
-collapse (sum) arrest_total (mean) population (sum) sum_pop = population, by(fips month)
+collapse (sum) arrest_total, by(fips month statecode)
 gen year = "20" + "`yr'"
 sort fips month
 save "arrest_tot`yr'.dta", replace
@@ -92,14 +103,19 @@ foreach yr in 07 08 09 10 11 12 13 14 15 {
 append using "arrest_tot`yr'.dta"
 rm "arrest_tot`yr'.dta"
 }
-rm "arrest_tot.dta"
+rm "arrest_tot16.dta"
+save "output_datasets/arrest_total.dta", replace
+
+
 
 ** correction for county
 gen county = substr(fips,3,3)
+gen state_fips = substr(fips,1,2)
 destring county, replace force
 replace county = county*2 - 1
 tostring county, gen(county2) format(%03.0f) force
 drop fips 
+
 gen fips = state_fips + county2
 drop county*
 
