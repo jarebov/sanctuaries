@@ -1,0 +1,233 @@
+\documentclass[xcolor=pdftex,dvipsnames,table]{beamer}
+%\documentclass[xcolor=pdftex,dvipsnames,table,handout]{beamer}
+% EEHPT: You can change the theme color from Green to other colors.
+\usecolortheme[named=Blue]{structure}
+\useinnertheme{circles}
+\setbeamertemplate{enumerate items}[default]
+\setbeamertemplate{section in toc}[default]
+%\usetheme{Default}
+%\usepackage{times}
+%\setbeamerfont{title}{shape=\itshape,family=\rmfamily}
+\setbeamercovered{invisible}
+\usepackage{wrapfig}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{array}
+\usepackage{threeparttablex}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+%% THE FOLLOWING TO HAVE TIMES NEW ROMAN
+%\setbeamertemplate{frametitle}{
+%\begin{centering} 
+%\rmfamily\scshape \insertframetitle\par\vskip-6pt%\hrulefill
+%\end{centering}} 
+%\usefonttheme{serif}
+
+\setbeamertemplate{frametitle}{
+\begin{centering} 
+\insertframetitle\par%\hrulefill
+\end{centering}}
+
+
+\usepackage {tikz}
+\usepackage{textcomp}
+\usetikzlibrary{positioning}
+%\usepackage {xcolor}
+\usetikzlibrary{shapes,arrows}
+
+\usepackage{multirow}
+%\usepackage[T1]{fontenc}
+%\usepackage{txfonts}
+\newcommand\Fontv{\fontsize{5}{5.5}\selectfont}
+\newcommand\Fontvi{\fontsize{6}{7.4}\selectfont}
+\newcommand\Fontvii{\fontsize{7}{8.4}\selectfont}
+\newcommand\Fontviii{\fontsize{8}{9.6}\selectfont}
+\newcommand*\itemgray{%
+  \item[\color{gray}\scalebox{0.9}{\textbullet}]}
+  
+  
+  
+  %%% THE LINE BELOW MUST BE CHANGED WITH FOLDER IN USE!!
+\newcommand{\tablesfolder}{/Users/bbiasi/Dropbox/Research/sanctuaries/out}  
+
+
+  %%% THE LINE BELOW MUST BE CHANGED WITH FOLDER IN USE!!
+\graphicspath{{/Users/bbiasi/Dropbox/Research/sanctuaries/out/}}
+
+%\usepackage{lmodern}
+%\usepackage[beamer,customcolors]{hf-tikz}
+%\usepackage{enumitem}
+%\usepackage{xcolor}
+%\newif\ifgooditem
+%\gooditemtrue
+%\newcommand\gooditem{\gooditemtrue\item}
+%\newcommand\baditem{\gooditemfalse\item}
+
+%\tikzset{hl/.style={
+%    set fill color=white,
+%    set border color=red!80!black,
+%  },
+%}  
+%\setbeamertemplate{footline}[default]
+\setbeamercolor{button}{bg=white,fg=Blue}
+\setbeamertemplate{button}[circle]
+
+\usepackage{tikz}
+\usepackage{bbding}
+%\usepackage{pifont}
+\usepackage{wasysym}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{multirow}
+\setbeamertemplate
+ {footline}{\nonumber}
+  
+\AtBeginSection[]
+{
+   \begin{frame}
+        \frametitle{Outline}
+        \tableofcontents[currentsection, 
+    hideothersubsections]
+   \end{frame}
+}
+
+\AtBeginSubsection[]
+{
+   \begin{frame}
+        \frametitle{Outline}
+        \tableofcontents[currentsection,currentsubsection]
+   \end{frame}
+}
+
+\setbeamercolor{section in toc}{fg=Blue}
+\setbeamercolor{subsection in toc}{fg=Blue}
+\setbeamertemplate{section in toc}[sections numbered]
+\setbeamerfont{subsection in toc}{size=\small}
+
+
+
+
+\author[Short Name (U ABC)]{%
+  \texorpdfstring{%
+    \begin{columns}
+      \column{.3333\linewidth}
+      \centering
+      Jaime Arellano-Bover \\ Stanford
+      \column{.3333\linewidth}
+      \centering
+      Barbara Biasi \\ Princeton
+    \end{columns}
+ }
+ {Jaime Arellano-Bover, Barbara Biasi}
+}
+
+
+\beamertemplatenavigationsymbolsempty
+\begin{document}
+
+\title[Sanctuary cities and crime]{Sanctuary Cities and Crime}
+
+\date{December 2017}
+
+\maketitle
+
+\begin{frame}{Sanctuary Cities}
+\begin{itemize}
+\item Policies and practices of local authorities and law enforcement agencies (LEA) to restrict cooperation w/ federal authorities (FA) to enforce immigration law
+\begin{itemize}
+\item Prohibition of asking about immigration status
+\item Prohibition on cooperation with ICE
+\item Refusal to temporarily hold individuals or to notify ICE after release
+\item Refusal to sign 287(g) agreements - allow local officials to enforce immigration law
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Debate over Sanctuaries}
+\begin{itemize}
+\item Points against
+\begin{itemize}
+\item They are illegal
+\begin{itemize}
+\item 8 US code 1373: no LEA can have policies restricting local officials from communicating or exchanging information with the FA
+\item 8 US code 1373: no one may harbor illegal aliens or shield them from detection by FA
+\end{itemize}
+\item They harm public safety - make it easier to release criminals who should be deported
+\end{itemize}
+\item Points in favor:
+\begin{itemize}
+\item LEA shouldn't be forced to do FA's job
+\item They provide safe heavens for war refugees
+\item They reinforce trust between LEA and community, which improves policing activities
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ Do sanctuary cities affect crime?}
+\begin{itemize}
+\item In general: Does cooperation between LEA and FA on enforcement of immigration law affects crime?
+\item Today: Focus on refusals of ICE detainers, introduced in 91 counties between XXXX and 2016
+\item Future: look at 287(g) agreements
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Literature}
+\end{frame}
+
+\begin{frame}{Cooperation between LEA and ICE}
+\begin{itemize}
+\item Detainers - LEA keeps persons in custody after release to facilitate ICE's intervention
+\item Alerts - LEA notifies ICE when particular persons will be released
+\item 287(g) agreements - training for local officials to enforce immigration law
+\item ICE in local jails without warrants
+\item Local officials can inquire about immigration status
+\item (in general) Use of local resources in assisting with immigration enforcement
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{No ICE holds}
+\includegraphics[width = \textwidth]{map_detainer_upwork.png}
+\end{frame}
+
+\begin{frame}{No 287(g)}
+\includegraphics[width = \textwidth]{map_287g_upwork.png}
+\end{frame}
+
+\begin{frame}{Prohibition of asking about status}
+\includegraphics[width = \textwidth]{map_prohibitionasking_upwork.png}
+\end{frame}
+
+\begin{frame}{Total number of policies}
+\includegraphics[width = \textwidth]{map_total_upwork.png}
+\end{frame}
+
+\begin{frame}{Cooperation between LEA and ICE}
+\begin{itemize}
+\item \textbf{Detainers - LEA keeps persons in custody after release to facilitate ICE's intervention}
+\item Alerts - LEA notifies ICE when particular persons will be released
+\item \textbf{287(g) agreements - training for local officials to enforce immigration law}
+\item ICE in local jails without warrants
+\item Local officials can inquire about immigration status
+\item (in general)  Use of local resources in assisting with immigration enforcement
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Research design: border comparison}
+\begin{itemize}
+\item Compare counties which introduced no-detainer policy with bordering counties
+\item Exploit timing of introduction
+\end{itemize}
+\end{frame}
+
+\begin{frame}{No ICE detainer counties}
+\includegraphics[width = \textwidth]{map_detainer.png}
+\end{frame}
+
+\begin{frame}{Comparison}
+\tiny
+\input{\tablesfolder/sumstats.tex}
+\end{frame}
+
+\end{document}
