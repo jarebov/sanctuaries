@@ -20,9 +20,7 @@ if $user == 2{
 }
 **************************
 
-*foreach y of numlist 2000/2008 2010/2016{
-
-local y = 2007
+foreach y of numlist 2000/2008 2010/2016{
 
 use "$path/sanctuaries/data/UCR_FBI/UCR_master_file/work/reta`y'.dta", clear
 
@@ -149,7 +147,7 @@ preserve
 restore
 */
 
-local y=2007
+
 if inrange(`y',2000,2012) {
 	merge 1:1 ori7 using "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2012_expanded.dta", keepusing(fstate fcounty)
 	drop if _merge==2
@@ -159,7 +157,19 @@ if inrange(`y',2000,2012) {
 
 
 if inrange(`y',2013,2016) {
-	*two- step procedure using 2012 crosswalk and then the generated corsswalk
+	*three- step procedure using 2012 crosswalk,then the generated corosswalk, and then hand made exceptions
+	**2012
+	merge 1:1 ori7 using "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_ucr_2012_expanded.dta", keepusing(fstate fcounty)
+	drop if _merge==2
+	drop _merge
+	**those not matched by 2012
+	merge m:1 statecode popd1county using "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_2013onwards.dta", keepusing(fstate fcounty) update
+	drop if _merge==2
+	drop _merge
+	**the ones also not matched with this, manually generated crosswalk (using address)
+	merge 1:1 ori7 using "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_handmade_missing_cases2013onwards.dta", keepusing(fstate fcounty) update
+	drop if _merge==2
+	drop _merge
 }
 
 
@@ -337,4 +347,128 @@ reshape long cod1_c1_m cod3_c1_m cod6_c1_m cod11_c1_m cod17_c1_m cod21_c1_m cod2
 
 
 collapse (sum) cod*_c1_m cod*_c1_i_m codtot_m codtot_i_m, by(fips month)
+
+
+
+foreach c in 1 3 6 11 17 21 23{
+	rename cod`c'_c1_m	cod`c'
+	rename cod`c'_c1_i_m	cod`c'_i
+}
+
+rename codtot_m codtot
+rename codtot_i_m codtot_i
+
+gen year = `y'
+
+tostring month, gen(months)
+tostring year, gen(years)
+gen time = years + "m" + months
+gen timeb = monthly(time, "YM")
+format timeb %tm
+drop time years months
+rename timeb time
+
+destring fips, replace
+
+order fips time year month codtot codtot_i
+
+
+save "$path/sanctuaries/data/temp/offense_county_month_temp_`y'.dta", replace
+
+}
+
+
+use "$path/sanctuaries/data/temp/offense_county_month_temp_2000.dta", clear
+
+foreach y of numlist 2001/2008 2010/2016{
+
+	append using "$path/sanctuaries/data/temp/offense_county_month_temp_`y'.dta"
+
+}
+
+sort fips time
+
+*label crime codes
+label var cod1 "murder count"
+label var cod3 "rape count"
+label var cod6 "robbery count"
+label var cod11 "assault count"
+label var cod17 "burglary count"
+label var cod21 "larceny count"
+label var cod23 "auto theft count"
+label var codtot "sum count of all 7 index crimes"
+
+label var cod1_i "murder count - smoothed"
+label var cod3_i "rape count - smoothed"
+label var cod6_i "robbery count - smoothed"
+label var cod11_i "assault count - smoothed"
+label var cod17_i "burglary count - smoothed"
+label var cod21_i "larceny count - smoothed"
+label var cod23_i "auto theft count - smoothed"
+label var codtot_i "sum count of all 7 index crimes - smoothed"
+
+
+*merge population data
+merge m:1 fips year using "$path/sanctuaries/data/output_datasets/population.dta"
+drop if _merge==2
+drop _merge
+/*--> three counties have some missing population data: 46113, 51515, 21999:
+	21999 doesn't seem like a real FIPS code, seems like the county part of the code is missing
+	46113 and 51515 do not appear in the Wiki list of counties of their respective states
+*/
+
+
+
+*generate crime rate(s)
+foreach v of varlist cod* {
+
+	gen `v'_rate = (`v'*100000)/tot_pop
+
+}
+
+
+*label crime rate codes
+label var cod1_rate "murder per 100,000"
+label var cod3_rate "rape per 100,000"
+label var cod6_rate "robbery per 100,000"
+label var cod11_rate "assault per 100,000"
+label var cod17_rate "burglary per 100,000"
+label var cod21_rate "larceny per 100,000"
+label var cod23_rate "auto theft per 100,000"
+label var codtot_rate "all 7 index crimes per 100,000"
+
+label var cod1_i_rate "murder per 100,000 - smoothed"
+label var cod3_i_rate "rape per 100,000 - smoothed"
+label var cod6_i_rate "robbery per 100,000 - smoothed"
+label var cod11_i_rate "assault per 100,000 - smoothed"
+label var cod17_i_rate "burglary per 100,000 - smoothed"
+label var cod21_i_rate "larceny per 100,000 - smoothed"
+label var cod23_i_rate "auto theft per 100,000 - smoothed"
+label var codtot_i_rate "all 7 index crimes per 100,000 - smoothed"
+
+
+
+
+/*Even after aggregating at the county level, some values are negative (some agencies
+	report negative values some times to make up wrong number in other months). let's set
+	these to zero*/
+
+foreach v of varlist cod* {
+
+	replace `v' = 0 if `v'<0
+
+}
+
+
+
+
+save "$path/sanctuaries/data/output_datasets/offenses_county_month.dta", replace
+
+
+foreach y of numlist 2000/2008 2010/2016 {
+
+erase "$path/sanctuaries/data/temp/offense_county_month_temp_`y'.dta"
+}
+
+
 

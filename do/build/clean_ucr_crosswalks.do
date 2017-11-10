@@ -150,11 +150,13 @@ save "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_2013onwards.dta", replac
 
 
 
+/*Handmade cases for 2013 onwards that eluded the above approach*/
 	
+import excel "$path/sanctuaries/data/UCR_FBI/crosswalks/cw_handmade_missing_cases2013onwards.xlsx", sheet("Sheet1") firstrow clear
 	
-	
+isid ori7	
 
-	
+save "$path/sanctuaries/data/UCR_FBI/crosswalks/work/cw_handmade_missing_cases2013onwards.dta", replace 	
 	
 	
 	
