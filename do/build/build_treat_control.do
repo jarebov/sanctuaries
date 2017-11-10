@@ -63,6 +63,12 @@ drop if tag > 0 & treat == 0
 bysort border_id: gen T = _N
 drop if T == 1
 
+* question: should we treat the treated bordering counties as controls or not? what about treated counties who only border with treated?
+* here below, I am only treating counties as controls if they are truly nontreated.
+bysort fips: egen Treat = max(treat)
+drop if Treat != treat & treat == 0
+drop Treat
+
 * generate number of borders
 bysort fips: gen nr_borders = _N
 
