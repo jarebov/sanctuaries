@@ -70,7 +70,6 @@ destring fips, replace
 drop sumlev region division state county stname ctyname
 drop estimatesbase2000 popestimate2010 census2010pop
 reshape long popestimate, i(fips) j(year)
-keep if year >= 2005
 rename popestimate tot_pop
 append using "output_datasets/population_2010_2016.dta"
 label variable tot_pop "Total population count"
