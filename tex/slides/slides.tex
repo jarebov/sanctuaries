@@ -47,11 +47,11 @@
   
   
   %%% THE LINE BELOW MUST BE CHANGED WITH FOLDER IN USE!!
-\newcommand{\tablesfolder}{/Users/bbiasi/Dropbox/Research/sanctuaries/out}  
+\newcommand{\tablesfolder}{/Users/barbarabiasi/Dropbox/Research/sanctuaries/out}  
 
 
   %%% THE LINE BELOW MUST BE CHANGED WITH FOLDER IN USE!!
-\graphicspath{{/Users/bbiasi/Dropbox/Research/sanctuaries/out/}}
+\graphicspath{{/Users/barbarabiasi/Dropbox/Research/sanctuaries/out/}}
 
 %\usepackage{lmodern}
 %\usepackage[beamer,customcolors]{hf-tikz}
@@ -185,21 +185,11 @@
 \end{itemize}
 \end{frame}
 
-
-\begin{frame}{No ICE holds}
-\includegraphics[width = \textwidth]{map_detainer_upwork.png}
-\end{frame}
-
-\begin{frame}{No 287(g)}
-\includegraphics[width = \textwidth]{map_287g_upwork.png}
-\end{frame}
-
-\begin{frame}{Prohibition of asking about status}
-\includegraphics[width = \textwidth]{map_prohibitionasking_upwork.png}
-\end{frame}
-
-\begin{frame}{Total number of policies}
+\begin{frame}{Anti-cooperation policies}
+\begin{center}
 \includegraphics[width = \textwidth]{map_total_upwork.png}
+\\\tiny{Source: Immigrant Legal Resource Center, 2016.}
+\end{center}
 \end{frame}
 
 \begin{frame}{Cooperation between LEA and ICE}
@@ -229,5 +219,94 @@
 \tiny
 \input{\tablesfolder/sumstats.tex}
 \end{frame}
+
+\begin{frame}{Crime and Policies}
+\includegraphics[width = \textwidth]{offenses_policies.png}\\
+\tiny{Note: average of all counties at the year level}
+\end{frame}
+
+\begin{frame}{Total crime, by time to policy - treated counties}
+\includegraphics[width = \textwidth]{totcrime_by_month_treated.png}\\
+\tiny{Note: data at the county-month level}
+\end{frame}
+
+\begin{frame}{Violent and property crime, by time to policy - treated counties}
+\includegraphics[width = \textwidth]{violent_property_by_month_treated.png}\\
+\tiny{Note: data at the county-month level}
+\end{frame}
+
+
+\begin{frame}{Total crime, by time to policy - treated counties}
+\includegraphics[width = \textwidth]{totcrime_by_year_treated.png}\\
+\tiny{Note: data at the county-year level}
+\end{frame}
+
+\begin{frame}{Violent and property crime, by time to policy - treated counties}
+\includegraphics[width = \textwidth]{violent_property_by_year_treated.png}\\
+\tiny{Note: data at the county-year level}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - total crime}
+\includegraphics[width = \textwidth]{eventstudy_totcrime_qts.png}\\
+\tiny{Note: data at the county-border-month level. No border FE. Observations weighted by population.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - violent crime}
+\includegraphics[width = \textwidth]{eventstudy_violent_qts.png}\\
+\tiny{Note: data at the county-border-month level. No border FE. Observations weighted by population.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - property crime}
+\includegraphics[width = \textwidth]{eventstudy_property_qts.png}\\
+\tiny{Note: data at the county-border-month level. No border FE. Observations weighted by population.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - total crime}
+\includegraphics[width = \textwidth]{eventstudy_totcrime_qts_border.png}\\
+\tiny{Note: data at the county-border-month level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - violent crime}
+\includegraphics[width = \textwidth]{eventstudy_violent_qts_border.png}\\
+\tiny{Note: data at the county-border-month level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - property crime}
+\includegraphics[width = \textwidth]{eventstudy_property_qts_border.png}\\
+\tiny{Note: data at the county-border-month level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{frame}
+
+
+\begin{frame}{Event study, treated vs. bordering - total crime}
+\includegraphics[width = \textwidth]{eventstudy_totcrime_qts_collapsed_border.png}\\
+\tiny{Note: data at the county-border-QUARTER level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - violent crime}
+\includegraphics[width = \textwidth]{eventstudy_violent_qts_collapsed_border.png}\\
+\tiny{Note: data at the county-border-QUARTER level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - property crime}
+\includegraphics[width = \textwidth]{eventstudy_property_qts_collapsed_border.png}\\
+\tiny{Note: data at the county-border-QUARTER level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - total crime}
+\includegraphics[width = \textwidth]{eventstudy_totcrime_yr_collapsed_border.png}\\
+\tiny{Note: data at the county-border-YEAR level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - violent crime}
+\includegraphics[width = \textwidth]{eventstudy_violent_yr_collapsed_border.png}\\
+\tiny{Note: data at the county-border-YEAR level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{frame}
+
+\begin{frame}{Event study, treated vs. bordering - property crime}
+\includegraphics[width = \textwidth]{eventstudy_property_yr_collapsed_border.png}\\
+\tiny{Note: data at the county-border-YEAR level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{frame}
+
+
 
 \end{document}
