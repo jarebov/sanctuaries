@@ -57,7 +57,7 @@ run "$build_do/clean_ucr_reta.do" //compile UCR monthly Return A from raw data i
 run "$build_do/build_arrests_file.do" // elaborates those yearly raw files and generates a county-month-year file with total arrests
 
 run "$build_do/clean_ucr_asr.do" //compile UCR monthly ASR from raw data into Stata raw data version (year by year)
-run "$build_do/build_offense_file.do" // elaborates those yearly raw files and generates a county-month-year file with total arrests
+run "$build_do/build_offense_file.do" // elaborates those yearly raw files and generates a county-month-year file with total offenses
 
 
 ******************

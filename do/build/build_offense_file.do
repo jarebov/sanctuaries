@@ -35,13 +35,9 @@ drop if statecode=="62" | statecode=="54" |statecode=="52" | statecode=="53" | s
 	I have checked and all crimes are practically zero for those agencies covered by someone else*/					
 drop if coveredby!=""
 
-*keep only "Number of Actual Offenses"
-drop cod*_c0_m*
-drop cod*_c2_m*
-drop cod*_c3_m*
 
 *destring all offense counts:
-foreach c in 1 {
+foreach c in 0 1 2 3 {
 	foreach k of numlist 1/28{
 		foreach m of numlist 1/12{
 
@@ -191,29 +187,33 @@ gen fips = fstate + fcounty
 
 *drop the other crimes and subcrime categories:
 foreach c in 2 4 5 7 8 9 10 12 13 14 15 16 18 19 20 22 24 25 26 27 28{
-	drop cod`c'_c1_m*
+	foreach k in 0 1 2 3{
+		drop cod`c'_c`k'_m*
+	}
 }
 
 *sum up the remaining seven for each month
 foreach m of numlist 1/12{
-	egen codtot_m`m' = rowtotal(cod1_c1_m`m' cod3_c1_m`m' cod6_c1_m`m' cod11_c1_m`m' cod17_c1_m`m' cod21_c1_m`m' cod23_c1_m`m')
+	foreach k in 0 1 2 3{
+		egen codtot_c`k'_m`m' = rowtotal(cod1_c`k'_m`m' cod3_c`k'_m`m' cod6_c`k'_m`m' cod11_c`k'_m`m' cod17_c`k'_m`m' cod21_c`k'_m`m' cod23_c`k'_m`m')
+	}
 }
 
 
 
-							/*Missing data issues*/
+							/*Missing data issues (base analysis on number of *actual* offenses - card 1)*/
 
 *drop agencies that in a given year they don't report crime on ANY month
-drop if codtot_m1<=0 & codtot_m2<=0 & codtot_m3<=0 & codtot_m4<=0 & codtot_m5<=0 ///
-		& codtot_m6<=0 & codtot_m7<=0 & codtot_m8<=0 & codtot_m9<=0 & codtot_m10<=0 ///
-		& codtot_m11<=0 & codtot_m12<=0
+drop if codtot_c1_m1<=0 & codtot_c1_m2<=0 & codtot_c1_m3<=0 & codtot_c1_m4<=0 & codtot_c1_m5<=0 ///
+		& codtot_c1_m6<=0 & codtot_c1_m7<=0 & codtot_c1_m8<=0 & codtot_c1_m9<=0 & codtot_c1_m10<=0 ///
+		& codtot_c1_m11<=0 & codtot_c1_m12<=0
 
 
 /*number with positive reporting and reporting pattern*/
 foreach m of numlist 1/12{
 
 	gen d`m'=0
-	replace d`m'=1 if codtot_m`m'>0
+	replace d`m'=1 if codtot_c1_m`m'>0
 	
 	tostring d`m', gen(d`m's)
 }		
@@ -242,7 +242,9 @@ replace rep_quarterly=1 if rep_pattern=="001001001001"
 foreach c in 1 3 6 11 17 21 23{ //7 index crimes
 	foreach d in 3 6 12{ //number to divide by
 		foreach m in 3 6 9 12{ //reference month
-			gen cod`c'_c1_m`m'_d`d' = cod`c'_c1_m`m'/`d'
+			foreach k in 0 1 2 3{ //types of reporting
+				gen cod`c'_c`k'_m`m'_d`d' = cod`c'_c`k'_m`m'/`d'
+			}
 		}
 	}
 	
@@ -251,39 +253,44 @@ foreach c in 1 3 6 11 17 21 23{ //7 index crimes
 *generate new imputed variable version for each crime
 foreach m of numlist 1/12{
 
-	foreach c in 1 3 6 11 17 21 23{
+	foreach k in 0 1 2 3{ 
+	
+		foreach c in 1 3 6 11 17 21 23{
+		
 
-		gen cod`c'_c1_i_m`m' =  cod`c'_c1_m`m'
+		gen cod`c'_c`k'_i_m`m' =  cod`c'_c`k'_m`m'
 		
 		* reported annually:
-		replace cod`c'_c1_i_m`m' = cod`c'_c1_m12_d12 if rep_annual==1
+		replace cod`c'_c`k'_i_m`m' = cod`c'_c`k'_m12_d12 if rep_annual==1
 		
 		*reported biannually:
 		if inrange(`m',1,6){
-			replace cod`c'_c1_i_m`m' = cod`c'_c1_m6_d6 if rep_biannual==1
+			replace cod`c'_c`k'_i_m`m' = cod`c'_c`k'_m6_d6 if rep_biannual==1
 		}
 		if inrange(`m',7,12){
-			replace cod`c'_c1_i_m`m' = cod`c'_c1_m12_d6 if rep_biannual==1
+			replace cod`c'_c`k'_i_m`m' = cod`c'_c`k'_m12_d6 if rep_biannual==1
 		}
 		
 		*reported quarterly:
 		if inrange(`m',1,3){
-			replace cod`c'_c1_i_m`m' = cod`c'_c1_m3_d3 if rep_quarterly==1
+			replace cod`c'_c`k'_i_m`m' = cod`c'_c`k'_m3_d3 if rep_quarterly==1
 		}
 		if inrange(`m',4,6){
-			replace cod`c'_c1_i_m`m' = cod`c'_c1_m6_d3 if rep_quarterly==1
+			replace cod`c'_c`k'_i_m`m' = cod`c'_c`k'_m6_d3 if rep_quarterly==1
 		}
 		if inrange(`m',6,9){
-			replace cod`c'_c1_i_m`m' = cod`c'_c1_m9_d3 if rep_quarterly==1
+			replace cod`c'_c`k'_i_m`m' = cod`c'_c`k'_m9_d3 if rep_quarterly==1
 		}
 		if inrange(`m',10,12){
-			replace cod`c'_c1_i_m`m' = cod`c'_c1_m12_d3 if rep_quarterly==1
+			replace cod`c'_c`k'_i_m`m' = cod`c'_c`k'_m12_d3 if rep_quarterly==1
 		}
-	}
-	egen codtot_i_m`m' = rowtotal(cod1_c1_i_m`m' cod3_c1_i_m`m' cod6_c1_i_m`m' cod11_c1_i_m`m' cod17_c1_i_m`m' cod21_c1_i_m`m' cod23_c1_i_m`m')
+		}
 		
-}
+		egen codtot_c`k'_i_m`m' = rowtotal(cod1_c`k'_i_m`m' cod3_c`k'_i_m`m' cod6_c`k'_i_m`m' cod11_c`k'_i_m`m' cod17_c`k'_i_m`m' cod21_c`k'_i_m`m' cod23_c`k'_i_m`m')
+		
 
+	}
+}
 
 
  
@@ -342,21 +349,45 @@ drop rec_k*_j* rec_j*_occurrence
 /*Reshape to long form, monthly panel*/
 reshape long cod1_c1_m cod3_c1_m cod6_c1_m cod11_c1_m cod17_c1_m cod21_c1_m cod23_c1_m ///
 				cod1_c1_i_m cod3_c1_i_m cod6_c1_i_m cod11_c1_i_m cod17_c1_i_m cod21_c1_i_m cod23_c1_i_m ///
-				codtot_m codtot_i_m ///
+				codtot_c1_m codtot_c1_i_m ///
+			cod1_c0_m cod3_c0_m cod6_c0_m cod11_c0_m cod17_c0_m cod21_c0_m cod23_c0_m ///
+				cod1_c0_i_m cod3_c0_i_m cod6_c0_i_m cod11_c0_i_m cod17_c0_i_m cod21_c0_i_m cod23_c0_i_m ///
+				codtot_c0_m codtot_c0_i_m ///
+			cod1_c2_m cod3_c2_m cod6_c2_m cod11_c2_m cod17_c2_m cod21_c2_m cod23_c2_m ///
+				cod1_c2_i_m cod3_c2_i_m cod6_c2_i_m cod11_c2_i_m cod17_c2_i_m cod21_c2_i_m cod23_c2_i_m ///
+				codtot_c2_m codtot_c2_i_m ///
+			cod1_c3_m cod3_c3_m cod6_c3_m cod11_c3_m cod17_c3_m cod21_c3_m cod23_c3_m ///
+				cod1_c3_i_m cod3_c3_i_m cod6_c3_i_m cod11_c3_i_m cod17_c3_i_m cod21_c3_i_m cod23_c3_i_m ///
+				codtot_c3_m codtot_c3_i_m ///		
 			, i(oricode) j(month)
 
 
-collapse (sum) cod*_c1_m cod*_c1_i_m codtot_m codtot_i_m, by(fips month)
+collapse (sum) cod1_c1_m cod3_c1_m cod6_c1_m cod11_c1_m cod17_c1_m cod21_c1_m cod23_c1_m ///
+				cod1_c1_i_m cod3_c1_i_m cod6_c1_i_m cod11_c1_i_m cod17_c1_i_m cod21_c1_i_m cod23_c1_i_m ///
+				codtot_c1_m codtot_c1_i_m ///
+			cod1_c0_m cod3_c0_m cod6_c0_m cod11_c0_m cod17_c0_m cod21_c0_m cod23_c0_m ///
+				cod1_c0_i_m cod3_c0_i_m cod6_c0_i_m cod11_c0_i_m cod17_c0_i_m cod21_c0_i_m cod23_c0_i_m ///
+				codtot_c0_m codtot_c0_i_m ///
+			cod1_c2_m cod3_c2_m cod6_c2_m cod11_c2_m cod17_c2_m cod21_c2_m cod23_c2_m ///
+				cod1_c2_i_m cod3_c2_i_m cod6_c2_i_m cod11_c2_i_m cod17_c2_i_m cod21_c2_i_m cod23_c2_i_m ///
+				codtot_c2_m codtot_c2_i_m ///
+			cod1_c3_m cod3_c3_m cod6_c3_m cod11_c3_m cod17_c3_m cod21_c3_m cod23_c3_m ///
+				cod1_c3_i_m cod3_c3_i_m cod6_c3_i_m cod11_c3_i_m cod17_c3_i_m cod21_c3_i_m cod23_c3_i_m ///
+				codtot_c3_m codtot_c3_i_m 	, by(fips month)
 
 
 
 foreach c in 1 3 6 11 17 21 23{
-	rename cod`c'_c1_m	cod`c'
-	rename cod`c'_c1_i_m	cod`c'_i
+	foreach k in 0 1 2 3{
+		rename cod`c'_c`k'_m	cod`c'_c`k'
+		rename cod`c'_c`k'_i_m	cod`c'_c`k'_i
+	}
 }
 
-rename codtot_m codtot
-rename codtot_i_m codtot_i
+foreach k in 0 1 2 3{
+	rename codtot_c`k'_m codtot_c`k'
+	rename codtot_c`k'_i_m codtot_c`k'_i
+}
 
 gen year = `y'
 
@@ -370,13 +401,17 @@ rename timeb time
 
 destring fips, replace
 
-order fips time year month codtot codtot_i
+order fips time year month codtot_c1 codtot_c1_i codtot_c0 codtot_c0_i codtot_c2 codtot_c2_i codtot_c3 codtot_c3_i
 
 
 save "$path/sanctuaries/data/temp/offense_county_month_temp_`y'.dta", replace
 
 }
 
+
+
+
+*append all years together
 
 use "$path/sanctuaries/data/temp/offense_county_month_temp_2000.dta", clear
 
@@ -389,24 +424,25 @@ foreach y of numlist 2001/2008 2010/2016{
 sort fips time
 
 *label crime codes
-label var cod1 "murder count"
-label var cod3 "rape count"
-label var cod6 "robbery count"
-label var cod11 "assault count"
-label var cod17 "burglary count"
-label var cod21 "larceny count"
-label var cod23 "auto theft count"
-label var codtot "sum count of all 7 index crimes"
+foreach k in 0 1 2 3{
+	label var cod1_c`k' "murder count card `k'"
+	label var cod3_c`k' "rape count card `k'"
+	label var cod6_c`k' "robbery count card `k'"
+	label var cod11_c`k' "assault count card `k'"
+	label var cod17_c`k' "burglary count card `k'"
+	label var cod21_c`k' "larceny count card `k'"
+	label var cod23_c`k' "auto theft count card `k'"
+	label var codtot_c`k' "sum count of all 7 index crimes card `k'"
 
-label var cod1_i "murder count - smoothed"
-label var cod3_i "rape count - smoothed"
-label var cod6_i "robbery count - smoothed"
-label var cod11_i "assault count - smoothed"
-label var cod17_i "burglary count - smoothed"
-label var cod21_i "larceny count - smoothed"
-label var cod23_i "auto theft count - smoothed"
-label var codtot_i "sum count of all 7 index crimes - smoothed"
-
+	label var cod1_c`k'_i "murder count card `k'- smoothed"
+	label var cod3_c`k'_i "rape count card `k'- smoothed"
+	label var cod6_c`k'_i "robbery count card `k'- smoothed"
+	label var cod11_c`k'_i "assault count card `k'- smoothed"
+	label var cod17_c`k'_i "burglary count card `k'- smoothed"
+	label var cod21_c`k'_i "larceny count card `k'- smoothed"
+	label var cod23_c`k'_i "auto theft count card `k'- smoothed"
+	label var codtot_c`k'_i "sum count of all 7 index crimes card `k'- smoothed"
+}
 
 *merge population data
 merge m:1 fips year using "$path/sanctuaries/data/output_datasets/population.dta"
@@ -419,6 +455,40 @@ drop _merge
 
 
 
+****some within-county outliers that seem like obvious mistakes in coding. fix them
+	sort fips time
+
+	/*county 6001: 2003m12 looks like an extreme upwards outlier and 2004m1, 2004m2 extreme downwards outliers. 
+	Might be the case that 2003m12 is capturing data from 2004m1-m2. smooth over those three months*/
+	gen codtot_c1_iB = codtot_c1_i
+	replace codtot_c1_iB = (codtot_c1_i+codtot_c1_i[_n+1]+codtot_c1_i[_n+2])/3 if fips==6001 & time==tm(2003m12)
+	replace codtot_c1_iB = (codtot_c1_i+codtot_c1_i[_n-1]+codtot_c1_i[_n+1])/3 if fips==6001 & time==tm(2004m1)
+	replace codtot_c1_iB = (codtot_c1_i+codtot_c1_i[_n-1]+codtot_c1_i[_n-2])/3 if fips==6001 & time==tm(2004m2)
+
+	replace codtot_c1_i = codtot_c1_iB
+	drop codtot_c1_iB
+
+	/*county 20017: Extreme outlier 2008m1 and 2012m10*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+1])/2 if fips==20017 & (time==tm(2008m1) | time==tm(2012m10))
+
+	/*county 36061: Reported monthly in 2002 quarters 1 and 2, but only quarterly in quarters 3 and 4. smooth those two quarters */
+	replace codtot_c1_i = codtot_c1_i[_n+2]/3 if fips==36061 & (time==tm(2002m7) | time==tm(2002m10))
+	replace codtot_c1_i = codtot_c1_i[_n+1]/3 if fips==36061 & (time==tm(2002m8) | time==tm(2002m11))
+	replace codtot_c1_i = codtot_c1_i/3 	  if fips==36061 & (time==tm(2002m9) | time==tm(2002m12))
+
+	/*county 44007: Extreme outlier 2006m6*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+1])/2 if fips==44007 & (time==tm(2006m6))
+
+	/*county 51670: Extreme outliers 2002m2 and 2007m7*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+1])/2 if fips==51670 & (time==tm(2002m2) | time==tm(2007m7))
+
+	/*county 51730: Extreme outlier 2006m7*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+1])/2 if fips==51730 & time==tm(2006m7)
+************************
+
+
+
+
 *generate crime rate(s)
 foreach v of varlist cod* {
 
@@ -428,24 +498,25 @@ foreach v of varlist cod* {
 
 
 *label crime rate codes
-label var cod1_rate "murder per 100,000"
-label var cod3_rate "rape per 100,000"
-label var cod6_rate "robbery per 100,000"
-label var cod11_rate "assault per 100,000"
-label var cod17_rate "burglary per 100,000"
-label var cod21_rate "larceny per 100,000"
-label var cod23_rate "auto theft per 100,000"
-label var codtot_rate "all 7 index crimes per 100,000"
+foreach k in 0 1 2 3{
+	label var cod1_c`k'_rate "murder per 100,000 card `k'"
+	label var cod3_c`k'_rate "rape per 100,000 card `k'"
+	label var cod6_c`k'_rate "robbery per 100,000 card `k'"
+	label var cod11_c`k'_rate "assault per 100,000 card `k'"
+	label var cod17_c`k'_rate "burglary per 100,000 card `k'"
+	label var cod21_c`k'_rate "larceny per 100,000 card `k'"
+	label var cod23_c`k'_rate "auto theft per 100,000 card `k'"
+	label var codtot_c`k'_rate "all 7 index crimes per 100,000 card `k'"
 
-label var cod1_i_rate "murder per 100,000 - smoothed"
-label var cod3_i_rate "rape per 100,000 - smoothed"
-label var cod6_i_rate "robbery per 100,000 - smoothed"
-label var cod11_i_rate "assault per 100,000 - smoothed"
-label var cod17_i_rate "burglary per 100,000 - smoothed"
-label var cod21_i_rate "larceny per 100,000 - smoothed"
-label var cod23_i_rate "auto theft per 100,000 - smoothed"
-label var codtot_i_rate "all 7 index crimes per 100,000 - smoothed"
-
+	label var cod1_c`k'_i_rate "murder per 100,000 card `k' - smoothed"
+	label var cod3_c`k'_i_rate "rape per 100,000 card `k' - smoothed"
+	label var cod6_c`k'_i_rate "robbery per 100,000 card `k' - smoothed"
+	label var cod11_c`k'_i_rate "assault per 100,000 card `k' - smoothed"
+	label var cod17_c`k'_i_rate "burglary per 100,000 card `k' - smoothed"
+	label var cod21_c`k'_i_rate "larceny per 100,000 card `k' - smoothed"
+	label var cod23_c`k'_i_rate "auto theft per 100,000 card `k' - smoothed"
+	label var codtot_c`k'_i_rate "all 7 index crimes per 100,000 card `k' - smoothed"
+}
 
 
 
