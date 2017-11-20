@@ -27,6 +27,11 @@ set more off
 **
 
 use adjacency_treated_wide.dta, clear
+
+* the following line drops undated counties & one county with detainer in 1997
+drop if date == "Undated " | date == "Sep-97" | date == ""
+drop if regexm(dateen,"17")
+
 preserve
 keep fips
 save treat_temp.dta, replace
@@ -37,6 +42,12 @@ qui foreach f of local Fips {
 noisily disp "`f'"
 preserve
 keep if fips == `f'
+
+qui foreach d of local Fips {
+forvalues b = 1/15 {
+replace adj_fips`b' = . if adj_fips`b' == `d'
+}
+}
 reshape long adj_fips, i(fips) j(n)
 drop if adj_fips == .
 gen border_id = string(fips) + "000000" + string(adj_fips)
@@ -46,6 +57,7 @@ sort fips
 merge 1:m fips using offenses_county_month.dta
 keep if _m == 3
 drop _m
+drop dateen
 gen nr_borders = _N
 sort fips
 save contr`f'.dta, replace
@@ -73,8 +85,17 @@ save control_panel.dta, replace
 restore
 
 ** generate borders for fips
+
+levelsof fips, local(Fips)
+qui foreach d of local Fips {
+forvalues b = 1/15 {
+replace adj_fips`b' = . if adj_fips`b' == `d'
+}
+}
+
 forvalues b = 1/15 {
 gen border_id`b' = 	string(fips) + "000000" + string(adj_fips`b')
+replace border_id`b' = 	"" if adj_fips`b' == .
 drop adj_fips`b'
 }
 sort fips
@@ -84,7 +105,9 @@ capt drop _m
 gen treat = 1
 egen fakeid = group(fips time)
 reshape long border_id, i(fakeid) j(bordernr)
+drop if border_id == ""
 append using control_panel.dta
+drop if border_id == ""
 save offense_panel_border.dta, replace
 
 ** month and date in which the policy was enacted
@@ -118,4 +141,3 @@ save offense_panel_border.dta, replace
 
 
 rm control_panel.dta
-rm treat_temp.dta

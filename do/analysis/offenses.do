@@ -33,6 +33,11 @@ sort fips
 merge m:1 fips using treat_control_list.dta
 gen other = _m == 1
 
+* the following code allows to look at UNFOUNDED offenses
+foreach var in codtot cod1 cod3 cod6 cod11 cod17 cod21 cod23 {
+rename `var'_c1_i_rate `var'_i_rate  
+}
+
 ** running variable for detainer*post enactment
 gen treat_post = 0 if other == 0
 replace treat_post = 1 if year > year_enacted
@@ -42,11 +47,11 @@ replace treat_post = 1 if year == year_enacted & month > month_enacted
 *** Trends by month
 preserve
 keep if year > 2003
-collapse codtot_i_rate (max) treat_post, by (fips year)
-collapse codtot_i_rate (sum) treat_post, by (year)
+collapse tot_pop (sum) codtot_i_rate (max) treat_post, by (fips year)
+collapse codtot_i_rate (sum) treat_post [aw = tot_pop], by (year)
 twoway 	(connected cod year, lcolor(black) mcolor(black)) 			///
 		(bar treat_post year, lcolor(gs10) fcolor(gs10) yaxis(2)) 	///
-		, ylabel(150(50)350) ylabel(0(50)400, axis(2)) ytitle("# offenses per 100,000") ///
+		, ylabel(2000(500)5000) ylabel(0(50)400, axis(2)) ytitle("# offenses per 100,000") ///
 		ytitle("# no-ICE policies", axis(2)) legend(order(1 "offenses per 100,000" 2 "no-ICE policies")) xlabel(2004(2)2016)
 graph export "$out/offenses_policies.png", replace
 restore
@@ -60,7 +65,7 @@ gen months_from = (year - year_enacted) * 12 + (month - month_enacted)
 *** Average arrest rates for treated counties, by time to enactment
 preserve
 keep if treat == 1
-keep codtot_i_rate violent property tot_pop fips year months_from
+keep codtot_i_rate_p violent property tot_pop fips year months_from
 duplicates drop
 collapse codtot violent property [aw = tot_pop], by(months_from)
 twoway	(connected codtot_i_rate months_from, lcolor(black) mcolor(black)) ///
@@ -117,21 +122,28 @@ graph export "$out/eventstudy_property_qts.png", replace
 
 			
 
-***************************************			 Border FE 			***************************************
+***************************************		 Border FE (monthly) 		***************************************
 
 set matsize 11000
 use offense_panel_border.dta, clear
 
+foreach var in codtot cod1 cod3 cod6 cod11 cod17 cod21 cod23 {
+rename `var'_c1_i_rate `var'_i_rate  
+}
+
 gen property = cod6_i_rate + cod17_i_rate + cod21_i_rate + cod23_i_rate
 gen violent = cod1_i_rate + cod3_i_rate + cod11_i_rate
 
-gen months_from = (year - year_enacted) * 12 + (month - month_enacted)
-gen trim_from = round(months_from / 3)
-qui tab trim_from if abs(trim_from) < 9, gen(m)
+keep if year >= 2004
 
-qui forvalues m = 1/17 {
+
+
+gen months_from = (year - year_enacted) * 12 + (month - month_enacted)
+qui tab months_from, gen(m)
+
+qui forvalues m = 1/251 {
 replace m`m' = 0 if treat == 0
-local n = `m' - 9
+local n = `m' - 151
 label variable m`m' "`n'"
 }
 
@@ -141,45 +153,61 @@ label variable zero "0"
 
 egen idborder = group(border_id)
 
-qui areg codtot_i_rate 	m1-m8 zero m10-m17 treat i.year i.month i.idborder if year >= 2007 [aw = weight], a(fips) cluster(fips)
+gen log_tot = log(codtot_i_rate)
+gen log_violent = log(violent)
+gen log_property = log(property)
+
+
+
+qui areg log_tot 	m139-m150 zero m152-m163 i.time i.idborder [aw = weight], a(fips) cluster(fips)
 eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert keep(m1 m2 m3 m4 m5 m6 m7 m8 zero m10 m11 m12 m13 m14 m15 m16 m17)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("quarters from policy") ytitle("change in total crime, per 100,000")
-graph export "$out/eventstudy_totcrime_qts_border.png", replace
+coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
+			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
+			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("months from policy") ytitle("change in total crime, per 100,000")
+graph export "$out/eventstudy_totcrime_months_border.png", replace
 
-qui areg violent 		m1-m8 zero m10-m17 treat i.year i.month i.idborder if year >= 2007 [aw = weight], a(fips) cluster(fips)
+qui areg log_violent 	m139-m150 zero m152-m163 i.time i.idborder [aw = weight], a(fips) cluster(fips)
 eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert keep(m1 m2 m3 m4 m5 m6 m7 m8 zero m10 m11 m12 m13 m14 m15 m16 m17)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("quarters from policy") ytitle("change in violent crime, per 100,000")
-graph export "$out/eventstudy_violent_qts_border.png", replace
+coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
+			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
+			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("months from policy") ytitle("change in violent crime, per 100,000")
+graph export "$out/eventstudy_violent_months_border.png", replace
 
-qui areg property 		m1-m8 zero m10-m17 treat i.year i.month i.idborder if year >= 2007 [aw = weight], a(fips) cluster(fips)
+qui areg log_property 	m139-m150 zero m152-m163 i.time i.idborder [aw = weight], a(fips) cluster(fips)
 eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert keep(m1 m2 m3 m4 m5 m6 m7 m8 zero m10 m11 m12 m13 m14 m15 m16 m17)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("quarters from policy") ytitle("change in property crime, per 100,000")
-graph export "$out/eventstudy_property_qts_border.png", replace
+coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
+			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
+			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("months from policy") ytitle("change in property crime, per 100,000")
+graph export "$out/eventstudy_property_months_border.png", replace
 
-***************************************		Border FE (data collapsed at the quarter level)		***************************************
+	
+
+***************************************		 Border FE (quarterly) 		***************************************
 
 set matsize 11000
 use offense_panel_border.dta, clear
-gen quarter = ceil(4 * month / 12)
-collapse tot_pop count_border (sum) *_i_rate, by(fips quarter year treat month_enacted year_enacted border_id)
-gen quarter_enacted = ceil(4 * month_enacted / 12)
+
+foreach var in codtot cod1 cod3 cod6 cod11 cod17 cod21 cod23 {
+rename `var'_c1_i_rate `var'_i_rate  
+}
 
 gen property = cod6_i_rate + cod17_i_rate + cod21_i_rate + cod23_i_rate
 gen violent = cod1_i_rate + cod3_i_rate + cod11_i_rate
+
+keep if year >= 2004
+
+gen quarter = ceil(4 * month / 12)
+collapse tot_pop count_border (sum) *_i_rate violent property, by(fips quarter year treat month_enacted year_enacted border_id)
+
+gen quarter_enacted = ceil(4 * month_enacted / 12)
 
 gen quarters_from = (year - year_enacted) * 4 + (quarter - quarter_enacted)
 
-qui tab quarters_from if abs(quarters_from) < 9, gen(m)
+qui tab quarters_from, gen(m)
 
-qui forvalues m = 1/17 {
+qui forvalues m = 1/76 {
 replace m`m' = 0 if treat == 0
-local n = `m' - 9
+local n = `m' - 43
 label variable m`m' "`n'"
 }
 
@@ -189,72 +217,65 @@ label variable zero "0"
 
 egen idborder = group(border_id)
 
-qui areg codtot_i_rate 	m1-m8 zero m10-m17 treat i.year i.month i.idborder if year >= 2007 [aw = weight], a(fips) cluster(fips)
+gen log_tot = log(codtot_i_rate)
+gen log_violent = log(violent)
+gen log_property = log(property)
+
+preserve
+collapse codtot_i_rate if treat == 1 [aw = weight ], by(quarters_from)
+twoway (connected codtot_i_rate quarters if abs(quarters) < 12)
+restore
+
+
+
+qui areg log_tot 	m35-m42 zero m44-m51 i.quarter#i.year [aw = weight], a(fips) cluster(fips)
 eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert keep(m1 m2 m3 m4 m5 m6 m7 m8 zero m10 m11 m12 m13 m14 m15 m16 m17)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(9) xtitle("quarters from policy") ytitle("change in total crime, per 100,000")
-graph export "$out/eventstudy_totcrime_qts_collapsed_border.png", replace
+coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
+			, vert drop(*month *quarter *year treat *idborder _cons)  levels(90) ///
+			omitted yline(0, lcolor(black) lpattern(dot)) xline(9) xtitle("months from policy") ytitle("change in total crime, per 100,000")
+graph export "$out/eventstudy_totcrime_qts_border.png", replace
 
-qui areg violent 	m1-m8 zero m10-m17 treat i.year i.month i.idborder if year >= 2007 [aw = weight], a(fips) cluster(fips)
+qui areg log_violent 	m35-m42 zero m44-m51 i.quarter#i.year i.idborder [aw = weight], a(fips) cluster(fips)
 eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert keep(m1 m2 m3 m4 m5 m6 m7 m8 zero m10 m11 m12 m13 m14 m15 m16 m17)  levels(90) ///
+coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
+			, vert drop(*month *quarter *year treat *idborder _cons)  levels(90) ///
 			omitted yline(0, lcolor(black) lpattern(dot)) xline(9) xtitle("quarters from policy") ytitle("change in violent crime, per 100,000")
-graph export "$out/eventstudy_violent_qts_collapsed_border.png", replace
+graph export "$out/eventstudy_violent_qts_border.png", replace
 
-qui areg property 	m1-m8 zero m10-m17 treat i.year i.month i.idborder if year >= 2007 [aw = weight], a(fips) cluster(fips)
+qui areg log_property 	m35-m42 zero m44-m51 i.quarter#i.year i.idborder [aw = weight], a(fips) cluster(fips)
 eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert keep(m1 m2 m3 m4 m5 m6 m7 m8 zero m10 m11 m12 m13 m14 m15 m16 m17)  levels(90) ///
+coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
+			, vert drop(*month *quarter *year treat *idborder _cons)  levels(90) ///
 			omitted yline(0, lcolor(black) lpattern(dot)) xline(9) xtitle("quarters from policy") ytitle("change in property crime, per 100,000")
-graph export "$out/eventstudy_property_qts_collapsed_border.png", replace
+graph export "$out/eventstudy_property_qts_border.png", replace
 
-***************************************	Border FE (analysis at the year level)	***************************************
+
+
+
+***************************************		 Border FE (yearly) 		***************************************
 
 set matsize 11000
 use offense_panel_border.dta, clear
-collapse tot_pop count_border (sum) *_i_rate, by(fips year treat month_enacted year_enacted border_id)
+
+foreach var in codtot cod1 cod3 cod6 cod11 cod17 cod21 cod23 {
+rename `var'_c1_i_rate `var'_i_rate  
+}
 
 gen property = cod6_i_rate + cod17_i_rate + cod21_i_rate + cod23_i_rate
 gen violent = cod1_i_rate + cod3_i_rate + cod11_i_rate
 
-gen years_from = (year - year_enacted) 
-replace years_from = 1 if year == year_enacted & month_enacted <= 6
+keep if year >= 2004
 
+collapse tot_pop count_border (mean) *_i_rate violent property, by(fips year treat month_enacted year_enacted border_id)
 
-*** Average arrest rates for treated counties, by time to enactment
-preserve
-keep if treat == 1
-keep codtot_i violent property tot_pop fips year years_from
-duplicates drop
-collapse codtot violent property [aw = tot_pop], by(years_from)
-twoway	(connected codtot_i_rate years_from, lcolor(black) mcolor(black)) ///
-		if abs(years_from) < 5, xline(0) ytitle("Total crimes per 100,000")  xtitle("years from policy")
-graph export "$out/totcrime_by_year_treated.png", replace
-restore
+gen years_from = (year - year_enacted)
+replace years_from = 1 if year == year_enacted & month_enacted <= 3
 
-** Property vs Violent crime:
+qui tab years_from, gen(m)
 
-preserve
-keep if treat == 1
-keep codtot_i violent property tot_pop fips year years_from
-duplicates drop
-collapse codtot violent property [aw = tot_pop], by(years_from)
-twoway	(connected violent years_from, lcolor(gs4) mcolor(gs4) lpattern(dash) msymbol(square)) ///
-		(connected property years_from, lcolor(gs12) mcolor(gs12) msymbol(x) yaxis(2)) ///
-		if abs(years_from) < 5, xline(0) legend(order(1 "Violent" 2 "Property"))  ///
-		ytitle("Violent crimes per 100,000") ytitle("Property crimes per 100,000", axis(2)) xtitle("years from policy")
-graph export "$out/violent_property_by_year_treated.png", replace
-restore
-
-
-** Event study
-
-qui tab years_from if abs(years_from) < 5, gen(m)
-qui forvalues m = 1/9 {
+qui forvalues m = 1/19 {
 replace m`m' = 0 if treat == 0
-local n = `m' - 5
+local n = `m' - 11
 label variable m`m' "`n'"
 }
 
@@ -264,23 +285,39 @@ label variable zero "0"
 
 egen idborder = group(border_id)
 
-qui areg codtot_i_rate 	m1-m4 zero m6-m9 treat i.year i.month i.idborder if year >= 2007 [aw = tot_pop], a(fips) cluster(fips)
+gen log_tot = log(codtot_i_rate)
+gen log_violent = log(violent)
+gen log_property = log(property)
+
+gen treat_post = years_from > 0 & treat == 1
+
+qui areg log_tot 	m7-m10 zero m12-m15 i.year i.idborder [aw = weight], a(fips) cluster(fips)
 eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert keep(m1 m2 m3 m4 zero m6 m7 m8 m9)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13)  xtitle("years from policy") ytitle("change in total crime, per 100,000")
-graph export "$out/eventstudy_totcrime_yr_collapsed_border.png", replace
+coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
+			, vert keep(m7 m8 m9 m10 zero m12 m13 m14 m15 m16 m17)  levels(90) ///
+			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("months from policy") ytitle("change in total crime, per 100,000")
+graph export "$out/eventstudy_totcrime_qts_border.png", replace
 
-qui areg violent 	m1-m4 zero m6-m9 treat i.year i.month i.idborder if year >= 2007 [aw = tot_pop], a(fips) cluster(fips)
+areg log_tot 	treat_post i.year i.idborder [aw = weight], a(fips) cluster(fips)
+
+
+qui areg log_violent m7-m10 zero m12-m15 i.year i.idborder [aw = weight], a(fips) cluster(fips)
 eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert keep(m1 m2 m3 m4 zero m6 m7 m8 m9)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13)  xtitle("years from policy") ytitle("change in violent crime, per 100,000")
-graph export "$out/eventstudy_violent_yr_collapsed_border.png", replace
+coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
+			, vert keep(m5 m6 m7 m8 m9 m10 zero m12 m13 m14 m15 m16 m17)  levels(90) ///
+			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("years from policy") ytitle("change in violent crime, per 100,000")
+graph export "$out/eventstudy_violent_qts_border.png", replace
 
-qui areg property 	m1-m4 zero m6-m9 treat i.year i.month i.idborder if year >= 2007 [aw = tot_pop], a(fips) cluster(fips)
+areg log_violent 	treat_post i.year i.idborder [aw = weight], a(fips) cluster(fips)
+
+
+qui areg log_property m7-m10 zero m12-m15 i.year i.idborder [aw = weight], a(fips) cluster(fips)
 eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert keep(m1 m2 m3 m4 zero m6 m7 m8 m9)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13)  xtitle("years from policy") ytitle("change in property crime, per 100,000")
-graph export "$out/eventstudy_property_yr_collapsed_border.png", replace
+coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
+			, vert keep(m5 m6 m7 m8 m9 m10 zero m12 m13 m14 m15 m16 m17)  levels(90) ///
+			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("years from policy") ytitle("change in property crime, per 100,000")
+graph export "$out/eventstudy_property_qts_border.png", replace
+
+areg log_tot 	treat_post i.year i.idborder [aw = weight], a(fips) cluster(fips)
+
+

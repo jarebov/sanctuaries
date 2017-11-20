@@ -57,7 +57,7 @@ drop _m
 * map of treated and control
 preserve
 rename fips county
-collapse treat, by(county)
+collapse (max) treat, by(county)
 maptile treat, geo(county2010) rangecolor(white green) conus stateoutline(thin) // twopt(legend(off))
 graph export "$out/map_detainer.png", replace
 restore
@@ -114,9 +114,9 @@ restore
 ** Table of simple comparisons of treated vs nontreated, using border FE
 
 * using border FE				
-gen weight = tot_pop / nr_border 
+gen weight = tot_pop / count_border 
 	
-foreach var $var {
+foreach var in $var {
 areg `var' treat [aw = weight], a(border_id) cluster(border_id)
 }
 log close
