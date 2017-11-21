@@ -113,4 +113,31 @@ bysort fips: egen count_border = sum(y)
 drop x y
 sort fips
 save treat_control.dta, replace
+
+keep fips treat dateen
+** month and date in which the policy was enacted
+
+gen month_enacted = substr(date,1,3) if date != "Undated"
+replace month_enacted = "01" if month_enacted == "Jan"
+replace month_enacted = "02" if month_enacted == "Feb"
+replace month_enacted = "03" if month_enacted == "Mar"
+replace month_enacted = "04" if month_enacted == "Apr"
+replace month_enacted = "05" if month_enacted == "May"
+replace month_enacted = "06" if month_enacted == "Jun"
+replace month_enacted = "07" if month_enacted == "Jul"
+replace month_enacted = "08" if month_enacted == "Aug"
+replace month_enacted = "09" if month_enacted == "Sep"
+replace month_enacted = "10" if month_enacted == "Oct"
+replace month_enacted = "11" if month_enacted == "Nov"
+replace month_enacted = "12" if month_enacted == "Dec"
+destring month_enacted, replace force
+
+
+gen year_enacted = "20" + substr(date,5,2) if date != "" & date != "Undated"
+replace year_enacted = "1997" if year_enacted == "2097"
+destring year_enacted, replace force
+drop dateen
+duplicates drop
+save treat_control_list.dta, replace
+
 rm control_panel.dta
