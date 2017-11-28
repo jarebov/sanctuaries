@@ -20,7 +20,7 @@ if $user == 2{
 }
 **************************
 
-foreach y of numlist 2000/2008 2010/2016{
+foreach y of numlist 2000/2016{
 
 use "$path/sanctuaries/data/UCR_FBI/UCR_master_file/work/reta`y'.dta", clear
 
@@ -536,7 +536,7 @@ foreach v of varlist cod* {
 save "$path/sanctuaries/data/output_datasets/offenses_county_month.dta", replace
 
 
-foreach y of numlist 2000/2008 2010/2016 {
+foreach y of numlist 2000/2016 {
 
 erase "$path/sanctuaries/data/temp/offense_county_month_temp_`y'.dta"
 }

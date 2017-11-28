@@ -16,7 +16,7 @@ if $user == 2{
 **************************
 
 
-foreach y of numlist 2000/2008, 2010/2016{
+foreach y of numlist 2000/2016{
 
 local year = `y'
 
@@ -57,11 +57,11 @@ if `year'==2008{
 local file = "reta2008/RETA08.DAT"
 }
 
-/*2009 MISSING (2011 FILE IS THERE INSTEAD)
+
 if `year'==2009{
-local file = "reta2009/RETA04.DAT"
+local file = "RETAYR2009/RETA09.DAT"
 }
-*/
+
 
 if `year'==2010{
 local file = "reta2010/RETA10.DAT"
