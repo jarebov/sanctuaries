@@ -108,6 +108,9 @@ gen time_quarter = qofd(dofm(time))
 format time_quarter %tq
 gen quarter_enactment = qofd(dofm(enactment))
 format quarter_enactment %tq
+
+drop if group == .
+
 collapse tot_pop treat (sum) *rate, by(fips quarter_enactment year time_quarter group nr_borders)
 
 *label crime rate codes

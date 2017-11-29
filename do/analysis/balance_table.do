@@ -49,7 +49,7 @@ drop if stateabbr == ""
 
 ** merge treatment nr. 1: county detainer
 sort fips
-merge 1:m fips using treat_control.dta	
+merge 1:m fips using treat_control_list.dta	
 gen other = _m == 1
 drop _m
 
@@ -73,7 +73,6 @@ replace Treat = 2 if treat == 1
 
 global var = "pop_density wkage_share lf_participation mig_in_rate mig_out_rate democratic share_black share_hisp u_rate ccd_exp_tot dropout_r cs_born_foreign rel_tot cs_fam_wkidsinglemom homeown median"
 
-preserve
 collapse $var tot_pop, by(fips Treat treat)
 label variable pop_density 			"pop. density (2010)"
 label variable wkage_share 			"working age pop. (2010)"
@@ -92,7 +91,10 @@ label variable cs_fam_wkidsinglemom "share single mothers (2000)"
 label variable homeown 				"home ownership rate (2000)"
 label variable medianinc 			"median income (2010)"
 label variable treat 				"no ICE detainer"
-replace Treat = - Treat
+
+label define Treat 0 "other" 1 "control" 2 "treated"
+label values Treat Treat
+
 eststo s1: estpost tabstat	$var [aw = tot_pop], by(Treat) statistics(mean sd) columns(statistics) listwise
 esttab s1 using $out/balance_all.tex, main(mean) aux(sd) nostar unstack nonote label replace noisily nogaps
 
@@ -102,21 +104,36 @@ eststo `var': reg `var' treat [aw = tot_pop]
 esttab	$var  using $out/balance_treatcontrol_ttest.tex	///
 		, b(4) se(4) unstack nonote label replace se keep(treat) star(* 0.10 ** 0.05 *** 0.01)
 eststo clear 
+
+
+preserve
 replace treat = 0 if treat == .
 foreach var in $var {
 eststo `var': reg `var' treat [aw = tot_pop]
 }
 esttab	$var  using $out/balance_all_ttest.tex	///
 		, b(4) se(4) unstack nonote label replace se keep(treat) star(* 0.10 ** 0.05 *** 0.01)
-		
-restore
+restore		
 
 ** Table of simple comparisons of treated vs nontreated, using border FE
 
-* using border FE				
-gen weight = tot_pop / count_border 
-	
+preserve
+use offense_panel_group.dta, clear
+keep fips treat group
+duplicates drop
+sort fips
+save temp.dta, replace
+restore
+
+sort fips
+merge 1:m fips using temp.dta
+keep if _m == 3
+drop _m
+rm temp.dta
+
 foreach var in $var {
-areg `var' treat [aw = weight], a(border_id) cluster(border_id)
+eststo `var': areg `var' treat [aw = tot_pop], a(group) 
 }
+esttab	$var  using $out/balance_treatcontrol_groupFE.tex	///
+
 log close

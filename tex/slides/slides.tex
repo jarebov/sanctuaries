@@ -47,11 +47,11 @@
   
   
   %%% THE LINE BELOW MUST BE CHANGED WITH FOLDER IN USE!!
-\newcommand{\tablesfolder}{/Users/barbarabiasi/Dropbox/Research/sanctuaries/out}  
+\newcommand{\tablesfolder}{/Users/bbiasi/Dropbox/Research/sanctuaries/out}  
 
 
   %%% THE LINE BELOW MUST BE CHANGED WITH FOLDER IN USE!!
-\graphicspath{{/Users/barbarabiasi/Dropbox/Research/sanctuaries/out/}}
+\graphicspath{{/Users/barbarabiasi/bbiasi/Research/sanctuaries/out/}}
 
 %\usepackage{lmodern}
 %\usepackage[beamer,customcolors]{hf-tikz}
@@ -166,12 +166,92 @@
 \begin{frame}{ Do sanctuary cities affect crime?}
 \begin{itemize}
 \item In general: Does cooperation between LEA and FA on enforcement of immigration law affects crime?
-\item Today: Focus on refusals of ICE detainers, introduced in 91 counties between XXXX and 2016
+\item Today: Focus on refusals of ICE detainers, introduced in XX counties between XXXX and 2016
 \item Future: look at 287(g) agreements
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Literature}
+\begin{itemize}
+\item Immigration and crime: Butcher and Piel (2007), Baker (2015), Pinotti (2017)
+\item LEA/FA cooperation and crime: Miles and Cox (2014, 2015)
+% Note: Miles&Cox (2014) use SecureCommunities program to study direct effect on crime. The 2015 article checks whether police officers find crimes at a higher rate, to test for cooperation. Both papers have a zero result
+\end{itemize}
+\end{frame}
+
+\section{Institutional background}
+
+\begin{frame}{Historical context}
+\begin{itemize}
+\item State and local police primary enforcers of criminal laws in US
+\item Historically, immigration law competence of FA
+\item 1996: Immigration and Nationality Act, Section 287(g)
+\begin{itemize}
+\item FA train LEA officers to enforce immigration law
+\item Widely used until 2008
+\end{itemize}
+\item 2008: Secure Communities
+\begin{itemize}
+\item Limit LEA discretion
+\item LEAs required to share info on arrested noncitizens
+\item Removals peak at 400,000/year in 2014
+\end{itemize}
+
+\item LEA/FA cooperation and crime: Miles and Cox (2014, 2015)
+% Note: Miles&Cox (2014) use SecureCommunities program to study direct effect on crime. The 2015 article checks whether police officers find crimes at a higher rate, to test for cooperation. Both papers have a zero result
+\end{itemize}
+\end{frame}
+
+recent years have seen a dramatic increase in
+direct state and local involvement in the enforcement of the federal immigration laws.5
+
+ 1996 immigration reforms creating
+a new program under Immigration and Nationality Act Section 287(g)
+
+Pursuant to so-called
+Section 287(g) agreements entered into by federal, state, and local governments, federal
+immigration authorities train state and local police in immigration enforcement and state and
+local law enforcement are authorized to affirmatively assist federal immigration authorities in
+enforcing the immigration laws. (widely used by Bush)
+
+Moving away from the use of Section 287(g) agreements, the Obama administration
+opted instead for the ?Secure Communities? program, which was designed to limit state and
+local police discretion in immigration enforcement while still relying on the state and local
+criminal justice systems to facilitate the removal of criminal noncitizens. required state and local 
+5law enforcement agencies to cooperate with federal immigration enforcement authorities.57 State
+and local police agencies shared information about noncitizens arrested with the federal
+government and were instructed to place immigration ?holds? on (i.e., detain) noncitizens who
+were arrested so that federal authorities had the time necessary to take custody of the noncitizens
+for possible removal. was so effective that removals soared to record highs in the neighborhood of approximately
+400,000 noncitizens a year in the first six years of the Obama presidency, regularly setting
+records for the number of removals.
+60 Secure Communities also resulted in the vast majority of
+the persons removed being Latina/o immigrants
+
+Concerned with the overbroad impacts and negative public safety implications of Secure
+Communities, some states and localities began to resist cooperation with the federal government
+in immigration enforcement and refused full participation in the program.
+62 Such resistance
+contributed to the Obama administration?s unceremonious dismantling of Secure Communities,
+63
+a step that was overshadowed in the public eye by the simultaneous announcement of a new
+expanded deferred action program that provoked considerable controversy and legal 
+
+?Priority Enforcement Program? (PEP) with the stated intent of
+focusing removal efforts on serious criminal offenders; PEP also changed federal policy to
+restrict requests for immigration ?holds? to noncitizens actually convicted of crimes rather than
+merely arrested for them
+
+\section{Institutional background}
+\begin{frame}{Cooperation between LEA and ICE}
+\begin{itemize}
+\item Detainers - LEA keeps persons in custody after release to facilitate ICE's intervention
+\item Alerts - LEA notifies ICE when particular persons will be released
+\item 287(g) agreements - training for local officials to enforce immigration law
+\item ICE in local jails without warrants
+\item Local officials can inquire about immigration status
+\item (in general) Use of local resources in assisting with immigration enforcement
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Cooperation between LEA and ICE}
@@ -196,115 +276,30 @@
 \begin{itemize}
 \item \textbf{Detainers - LEA keeps persons in custody after release to facilitate ICE's intervention}
 \item Alerts - LEA notifies ICE when particular persons will be released
-\item \textbf{287(g) agreements - training for local officials to enforce immigration law}
+\item \textbf{287(g) agreements - training for local officials to enforce immigration law (future)}
 \item ICE in local jails without warrants
 \item Local officials can inquire about immigration status
 \item (in general)  Use of local resources in assisting with immigration enforcement
 \end{itemize}
 \end{frame}
 
+\section{Research design}
 
-\begin{frame}{Research design: border comparison}
+\begin{frame}{Research design}
 \begin{itemize}
-\item Compare counties which introduced no-detainer policy with bordering counties
-\item Exploit timing of introduction
+\item Challenge: policies are not random - LEA's decision
+\item Need to find credible control group
+\begin{enumerate}
+\item Bordering counties w/out no-detainer policy
+\item Synthetic controls
+\end{enumerate}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{No ICE detainer counties}
+\begin{frame}{No-ICE counties and bordering counties}
+\begin{center}
 \includegraphics[width = \textwidth]{map_detainer.png}
-\end{frame}
-
-\begin{frame}{Comparison}
-\tiny
-\input{\tablesfolder/sumstats.tex}
-\end{frame}
-
-\begin{frame}{Crime and Policies}
-\includegraphics[width = \textwidth]{offenses_policies.png}\\
-\tiny{Note: average of all counties at the year level}
-\end{frame}
-
-\begin{frame}{Total crime, by time to policy - treated counties}
-\includegraphics[width = \textwidth]{totcrime_by_month_treated.png}\\
-\tiny{Note: data at the county-month level}
-\end{frame}
-
-\begin{frame}{Violent and property crime, by time to policy - treated counties}
-\includegraphics[width = \textwidth]{violent_property_by_month_treated.png}\\
-\tiny{Note: data at the county-month level}
-\end{frame}
-
-
-\begin{frame}{Total crime, by time to policy - treated counties}
-\includegraphics[width = \textwidth]{totcrime_by_year_treated.png}\\
-\tiny{Note: data at the county-year level}
-\end{frame}
-
-\begin{frame}{Violent and property crime, by time to policy - treated counties}
-\includegraphics[width = \textwidth]{violent_property_by_year_treated.png}\\
-\tiny{Note: data at the county-year level}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - total crime}
-\includegraphics[width = \textwidth]{eventstudy_totcrime_qts.png}\\
-\tiny{Note: data at the county-border-month level. No border FE. Observations weighted by population.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - violent crime}
-\includegraphics[width = \textwidth]{eventstudy_violent_qts.png}\\
-\tiny{Note: data at the county-border-month level. No border FE. Observations weighted by population.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - property crime}
-\includegraphics[width = \textwidth]{eventstudy_property_qts.png}\\
-\tiny{Note: data at the county-border-month level. No border FE. Observations weighted by population.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - total crime}
-\includegraphics[width = \textwidth]{eventstudy_totcrime_qts_border.png}\\
-\tiny{Note: data at the county-border-month level. With border FE. Observations weighted by population divided by nr. borders.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - violent crime}
-\includegraphics[width = \textwidth]{eventstudy_violent_qts_border.png}\\
-\tiny{Note: data at the county-border-month level. With border FE. Observations weighted by population divided by nr. borders.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - property crime}
-\includegraphics[width = \textwidth]{eventstudy_property_qts_border.png}\\
-\tiny{Note: data at the county-border-month level. With border FE. Observations weighted by population divided by nr. borders.}
-\end{frame}
-
-
-\begin{frame}{Event study, treated vs. bordering - total crime}
-\includegraphics[width = \textwidth]{eventstudy_totcrime_qts_collapsed_border.png}\\
-\tiny{Note: data at the county-border-QUARTER level. With border FE. Observations weighted by population divided by nr. borders.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - violent crime}
-\includegraphics[width = \textwidth]{eventstudy_violent_qts_collapsed_border.png}\\
-\tiny{Note: data at the county-border-QUARTER level. With border FE. Observations weighted by population divided by nr. borders.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - property crime}
-\includegraphics[width = \textwidth]{eventstudy_property_qts_collapsed_border.png}\\
-\tiny{Note: data at the county-border-QUARTER level. With border FE. Observations weighted by population divided by nr. borders.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - total crime}
-\includegraphics[width = \textwidth]{eventstudy_totcrime_yr_collapsed_border.png}\\
-\tiny{Note: data at the county-border-YEAR level. With border FE. Observations weighted by population divided by nr. borders.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - violent crime}
-\includegraphics[width = \textwidth]{eventstudy_violent_yr_collapsed_border.png}\\
-\tiny{Note: data at the county-border-YEAR level. With border FE. Observations weighted by population divided by nr. borders.}
-\end{frame}
-
-\begin{frame}{Event study, treated vs. bordering - property crime}
-\includegraphics[width = \textwidth]{eventstudy_property_yr_collapsed_border.png}\\
-\tiny{Note: data at the county-border-YEAR level. With border FE. Observations weighted by population divided by nr. borders.}
+\end{center}
 \end{frame}
 
 
