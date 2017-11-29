@@ -26,7 +26,7 @@ clear all
 set more off
 
 
-*************************************** Simple comparison - no border FE ***************************************
+******************************** Simple comparison - no groups (one obs is one county-month) ***************************************
 
 use offenses_county_month.dta, clear
 sort fips
@@ -70,7 +70,7 @@ graph export "$out/offenses_policies.png", replace
 restore
 
 
-*** Average arrest rates for treated counties, by time to enactment
+*** Average crime rates for treated counties, by time to enactment
 preserve
 keep if treat == 1
 keep codtot_i_rate violent property tot_pop fips year months_from
@@ -95,71 +95,10 @@ graph export "$out/violent_property_by_month_treated.png", replace
 restore
 
 
-
-*** Simple event study
-
-qui tab months_from, gen(m)
-
-qui forvalues m = 1/251 {
-replace m`m' = 0 if treat == 0
-local n = `m' - 151
-label variable m`m' "`n'"
-}
-
-gen zero = 0
-label variable zero "0"
-
-* logs
-qui areg log_tot 	m139-m150 zero m152-m163 i.time [aw = tot_pop], a(fips) cluster(fips)
-eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13)  xtitle("months from policy") ytitle("% change in total crime, per 100,000")
-graph export "$out/eventstudy_logcrime_qts.png", replace
-
-qui areg log_violent 	m139-m150 zero m152-m163 i.time [aw = tot_pop], a(fips) cluster(fips)
-eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13)  xtitle("months from policy") ytitle("% change in violent crime, per 100,000")
-graph export "$out/eventstudy_logviolent_qts.png", replace
-
-qui areg log_property 	m139-m150 zero m152-m163 i.time [aw = tot_pop], a(fips) cluster(fips)
-eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13)  xtitle("months from policy") ytitle("% change in violent crime, per 100,000")
-graph export "$out/eventstudy_logproperty_qts.png", replace
-
-	
-* levels
-qui areg codtot_i_rate 	m139-m150 zero m152-m163 i.time [aw = tot_pop], a(fips) cluster(fips)
-eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13)  xtitle("months from policy") ytitle("change in total crime, per 100,000")
-graph export "$out/eventstudy_crime_qts.png", replace
-
-qui areg violent 	m139-m150 zero m152-m163 i.time [aw = tot_pop], a(fips) cluster(fips)
-eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13)  xtitle("months from policy") ytitle("change in violent crime, per 100,000")
-graph export "$out/eventstudy_violent_qts.png", replace
-
-qui areg property 	m139-m150 zero m152-m163 i.time [aw = tot_pop], a(fips) cluster(fips)
-eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(lcolor(black) recast(rcap))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13)  xtitle("months from policy") ytitle("change in violent crime, per 100,000")
-graph export "$out/eventstudy_property_qts.png", replace
-
-			
-
-***************************************		 Border FE (monthly) 		***************************************
+**********************		Regressions - groups of treated and control 		***************************
 
 set matsize 11000
-use offense_panel_border.dta, clear
+use offense_panel_group.dta, clear
 
 ** generate useful variables 
 foreach var in codtot cod1 cod3 cod6 cod11 cod17 cod21 cod23 {
@@ -169,263 +108,250 @@ rename `var'_c1_i_rate `var'_i_rate
 gen property = cod6_i_rate + cod17_i_rate + cod21_i_rate + cod23_i_rate
 gen violent = cod1_i_rate + cod3_i_rate + cod11_i_rate
 
-keep if year >= 2004
-
-egen idborder = group(border_id)
-
-gen log_tot = log(codtot_i_rate)
-gen log_violent = log(violent)
-gen log_property = log(property)
-gen weight = tot_pop / count_border
-
-
-gen months_from = (year - year_enacted) * 12 + (month - month_enacted)
-qui tab months_from, gen(m)
-
-qui forvalues m = 1/251 {
-replace m`m' = 0 if treat == 0
-local n = `m' - 151
-label variable m`m' "`n'"
-}
-
-gen zero = 0
-label variable zero "0"
-
-
-
-* logs
-qui areg log_tot 	m139-m150 zero m152-m163 i.time i.idborder [aw = weight], a(fips) cluster(fips)
-eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("months from policy") ytitle("% change in total crime, per 100,000")
-graph export "$out/eventstudy_logcrime_months_border.png", replace
-
-qui areg log_violent 	m139-m150 zero m152-m163 i.time i.idborder [aw = weight], a(fips) cluster(fips)
-eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("months from policy") ytitle("% change in violent crime, per 100,000")
-graph export "$out/eventstudy_logviolent_months_border.png", replace
-
-qui areg log_property 	m139-m150 zero m152-m163 i.time i.idborder [aw = weight], a(fips) cluster(fips)
-eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("months from policy") ytitle("% change in property crime, per 100,000")
-graph export "$out/eventstudy_logproperty_months_border.png", replace
-
-	
-
-* levels
-qui areg codtot_i_rate 	m139-m150 zero m152-m163 i.time i.idborder [aw = weight], a(fips) cluster(fips)
-eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("months from policy") ytitle("% change in total crime, per 100,000")
-graph export "$out/eventstudy_crime_months_border.png", replace
-
-qui areg violent 	m139-m150 zero m152-m163 i.time i.idborder [aw = weight], a(fips) cluster(fips)
-eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("months from policy") ytitle("% change in violent crime, per 100,000")
-graph export "$out/eventstudy_violent_months_border.png", replace
-
-qui areg property 	m139-m150 zero m152-m163 i.time i.idborder [aw = weight], a(fips) cluster(fips)
-eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *time treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(13) xtitle("months from policy") ytitle("% change in property crime, per 100,000")
-graph export "$out/eventstudy_property_months_border.png", replace
-
-	
-
-***************************************		 Border FE (quarterly) 		***************************************
-
-set matsize 11000
-use offense_panel_border.dta, clear
-
-keep if year >= 2004
-gen weight = tot_pop / count_border
-
-** generate useful variables 
-foreach var in codtot cod1 cod3 cod6 cod11 cod17 cod21 cod23 {
-rename `var'_c1_i_rate `var'_i_rate  
-}
-
-gen property = cod6_i_rate + cod17_i_rate + cod21_i_rate + cod23_i_rate
-gen violent = cod1_i_rate + cod3_i_rate + cod11_i_rate
-
-
-gen quarter = ceil(4 * month / 12)
-
-* collapse data
-collapse tot_pop weight (sum) *_i_rate violent property, by(fips quarter year treat month_enacted year_enacted border_id)
-
-egen idborder = group(border_id)
 gen log_tot = log(codtot_i_rate)
 gen log_violent = log(violent)
 gen log_property = log(property)
 
-gen quarter_enacted = ceil(4 * month_enacted / 12)
-gen quarters_from = (year - year_enacted) * 4 + (quarter - quarter_enacted)
-qui tab quarters_from, gen(m)
+egen group_year = group(group year)
 
-qui forvalues m = 1/84 {
-replace m`m' = 0 if treat == 0
-local n = `m' - 51
-label variable m`m' "`n'"
-}
+gen post = time > enactment
+gen treat_post = treat == 1 & post == 1
 
-gen zero = 0
-label variable zero "0"
-
-* logs
-qui areg log_tot 	m35-m50 zero m52-m67 i.quarter#i.year [aw = weight], a(fips) cluster(fips)
-eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *quarter *year treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("months from policy") ytitle("change in total crime, per 100,000")
-graph export "$out/eventstudy_logcrime_qts_border.png", replace
-
-qui areg log_violent 	m35-m50 zero m52-m67 i.quarter#i.year [aw = weight], a(fips) cluster(fips)
-eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *quarter *year treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("quarters from policy") ytitle("change in violent crime, per 100,000")
-graph export "$out/eventstudy_logviolent_qts_border.png", replace
-
-qui areg log_property 	m35-m50 zero m52-m67 i.quarter#i.year [aw = weight], a(fips) cluster(fips)
-eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *quarter *year treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("quarters from policy") ytitle("change in property crime, per 100,000")
-graph export "$out/eventstudy_logproperty_qts_border.png", replace
-
-
-
-* levels
-qui areg codtot_i_rate 	m35-m50 zero m52-m67 i.quarter#i.year [aw = weight], a(fips) cluster(fips)
-eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *quarter *year treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("months from policy") ytitle("change in total crime, per 100,000")
-graph export "$out/eventstudy_crime_qts_border.png", replace
-
-qui areg violent 	m35-m50 zero m52-m67 i.quarter#i.year [aw = weight], a(fips) cluster(fips)
-eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *quarter *year treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("quarters from policy") ytitle("change in violent crime, per 100,000")
-graph export "$out/eventstudy_violent_qts_border.png", replace
-
-qui areg property 	m35-m50 zero m52-m67 i.quarter#i.year [aw = weight], a(fips) cluster(fips)
-eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert drop(*month *quarter *year treat *idborder _cons)  levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("quarters from policy") ytitle("change in property crime, per 100,000")
-graph export "$out/eventstudy_property_qts_border.png", replace
-
-
-
-
-***************************************		 Border FE (yearly) 		***************************************
-
-set matsize 11000
-use offense_panel_border.dta, clear
 
 keep if year >= 2004
-gen weight = tot_pop / count_border
 
-** generate useful variables 
-foreach var in codtot cod1 cod3 cod6 cod11 cod17 cod21 cod23 {
-rename `var'_c1_i_rate `var'_i_rate  
+* time frame - 12, 24, or 36 months
+
+foreach time in 24 36 {
+gen Timeframe = 1 if abs(time - enactment) < `time'
+bysort group time: egen timeframe = max(Timeframe)
+drop Timeframe
+
+* simple diff-in-diff
+qui reg codtot_i_rate treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui reg log_tot treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses_`time'.doc", keep(treat treat_post) word ctitle("total") replace label ///
+		addtext(Time FE,Yes,County FE,No,Group FE,No,Group*Year FE,No) dec(3) 
+		
+qui reg property treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui reg log_property treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses_`time'.doc", keep(treat treat_post) word ctitle("property") append label ///
+		addtext(Time FE,Yes,County FE,No,Group FE,No,Group*Year FE,No) dec(3) 
+		
+qui reg violent treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui reg log_violent treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses_`time'.doc", keep(treat treat_post) word ctitle("violent") append label ///
+		addtext(Time FE,Yes,County FE,No,Group FE,No,Group*Year FE,No) dec(3) 
+		
+
+* diff-in-diff - group FE
+qui areg codtot_i_rate treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_tot treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses_`time'.doc", keep(treat treat_post) word ctitle("total") append label ///
+		addtext(Time FE,Yes,County FE,No,Group FE,Yes,Group*Year FE,No) dec(3)
+		
+qui areg property treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_property treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses_`time'.doc", keep(treat treat_post) word ctitle("property") append label ///
+		addtext(Time FE,Yes,County FE,No,Group FE,Yes,Group*Year FE,No) dec(3)
+		
+qui areg violent treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_violent treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses_`time'.doc", keep(treat treat_post) word ctitle("violent") append label ///
+		addtext(Time FE,Yes,County FE,No,Group FE,Yes,Group*Year FE,No) dec(3)
+
+* diff-in-diff - county FE
+qui areg codtot_i_rate treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+		
+qui areg log_tot treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses_`time'.doc", keep(treat treat_post) word ctitle("total") append label ///
+		addtext(Time FE,Yes,County FE,Yes,Group FE,No,Group*Year FE,No) dec(3)
+		
+qui areg property treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_property treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses_`time'.doc", keep(treat treat_post) word ctitle("property") append label ///
+		addtext(Time FE,Yes,County FE,Yes,Group FE,No,Group*Year FE,No) dec(3)
+		
+qui areg violent treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_violent treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses_`time'.doc", keep(treat treat_post) word ctitle("violent") append label ///
+		addtext(Time FE,Yes,County FE,Yes,Group FE,No,Group*Year FE,No) dec(3)
+		
+* diff-in-diff - group*year FE
+
+qui areg codtot_i_rate treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_tot treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses2_`time'.doc", keep(treat treat_post) word ctitle("total") replace label ///
+		addtext(Time FE,Yes,County FE,No,Group FE,No,Group*Year FE,Yes) dec(3)
+		
+qui areg property treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_property treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses2_`time'.doc", keep(treat treat_post) word ctitle("property") append label ///
+		addtext(Time FE,Yes,County FE,No,Group FE,No,Group*Year FE,Yes) dec(3)
+		
+qui areg violent treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_violent treat treat_post i.time if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses2_`time'.doc", keep(treat treat_post) word ctitle("violent") append label ///
+		addtext(Time FE,Yes,County FE,No,Group FE,No,Group*Year FE,Yes) dec(3)
+		
+* diff-in-diff - group and county FE
+
+qui areg codtot_i_rate treat treat_post i.time i.group if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_tot treat treat_post i.time i.group if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses2_`time'.doc", keep(treat treat_post) word ctitle("total") append label ///
+		addtext(Time FE,Yes,County FE,Yes,Group FE,Yes,Group*Year FE,No) dec(3)
+		
+qui areg property treat treat_post i.time i.group if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_property treat treat_post i.time i.group if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses2_`time'.doc", keep(treat treat_post) word ctitle("property") append label ///
+		addtext(Time FE,Yes,County FE,Yes,Group FE,Yes,Group*Year FE,No) dec(3)
+		
+qui areg violent treat treat_post i.time i.group if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_violent treat treat_post i.time i.group if timeframe == 1 [aw = tot_pop], cluster(fips) a(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses2_`time'.doc", keep(treat treat_post) word ctitle("violent") append label ///
+		addtext(Time FE,Yes,County FE,Yes,Group FE,Yes,Group*Year FE,No) dec(3)
+		
+* diff-in-diff - group-year and county FE
+
+qui areg codtot_i_rate treat treat_post i.time i.fips if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_tot treat_post i.time i.fips if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses2_`time'.doc", keep(treat treat_post) word ctitle("total") append label ///
+		addtext(Time FE,Yes,County FE,Yes,Group FE,No,Group*Year FE,Yes) dec(3)
+		
+qui areg property treat_post i.time i.fips if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_property treat treat_post i.time i.fips if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses2_`time'.doc", keep(treat treat_post) word ctitle("property") append label ///
+		addtext(Time FE,Yes,County FE,Yes,Group FE,No,Group*Year FE,Yes) dec(3)
+		
+qui areg violent treat_post i.time i.fips if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+
+qui areg log_violent treat treat_post i.time i.fips if timeframe == 1 [aw = tot_pop], cluster(fips) a(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+disp e(N)
+outreg2 using "$out/offenses2_`time'.doc", keep(treat treat_post) word ctitle("violent") append label ///
+		addtext(Time FE,Yes,County FE,Yes,Group FE,No,Group*Year FE,Yes) dec(3)
+		
+drop timeframe 
 }
-
-gen property = cod6_i_rate + cod17_i_rate + cod21_i_rate + cod23_i_rate
-gen violent = cod1_i_rate + cod3_i_rate + cod11_i_rate
-
-* collapse data
-collapse tot_pop weight (sum) *_i_rate violent property, by(fips year treat month_enacted year_enacted border_id)
-
-egen idborder = group(border_id)
-gen log_tot = log(codtot_i_rate)
-gen log_violent = log(violent)
-gen log_property = log(property)
-
-gen years_from = (year - year_enacted)
-replace years_from = 1 if year == year_enacted & month_enacted <= 3
-
-qui tab years_from, gen(m)
-
-qui forvalues m = 1/21 {
-replace m`m' = 0 if treat == 0
-local n = `m' - 13
-label variable m`m' "`n'"
-}
-
-gen zero = 0
-label variable zero "0"
-
-* logs
-qui areg log_tot 	m1-m12 zero m14-m21 i.year i.idborder [aw = weight], a(fips) cluster(fips)
-eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert keep(m9 m10 m11 m12 zero m14 m15 m16 m17) levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("months from policy") ytitle("% change in total crime, per 100,000")
-graph export "$out/eventstudy_logcrime_yrs_border.png", replace
-
-areg log_tot 	treat_post i.year i.idborder [aw = weight], a(fips) cluster(fips)
-
-
-qui areg log_violent m1-m12 zero m14-m21 i.year i.idborder [aw = weight], a(fips) cluster(fips)
-eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert keep(m9 m10 m11 m12 zero m14 m15 m16 m17) levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("years from policy") ytitle("% change in violent crime, per 100,000")
-graph export "$out/eventstudy_logviolent_yrs_border.png", replace
-
-areg log_violent 	treat_post i.year i.idborder [aw = weight], a(fips) cluster(fips)
-
-
-qui areg log_property m1-m12 zero m14-m21 i.year i.idborder [aw = weight], a(fips) cluster(fips)
-eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert keep(m9 m10 m11 m12 zero m14 m15 m16 m17) levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("years from policy") ytitle("% change in property crime, per 100,000")
-graph export "$out/eventstudy_logproperty_yrs_border.png", replace
-
-areg log_tot 	treat_post i.year i.idborder [aw = weight], a(fips) cluster(fips)
-
-* levels
-qui areg codtot_i_rate 	m1-m12 zero m14-m21 i.year i.idborder [aw = weight], a(fips) cluster(fips)
-eststo codtot_i_rate
-coefplot	(codtot_i_rate, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert keep(m9 m10 m11 m12 zero m14 m15 m16 m17) levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("months from policy") ytitle("change in total crime, per 100,000")
-graph export "$out/eventstudy_crime_yrs_border.png", replace
-
-areg log_tot 	treat_post i.year i.idborder [aw = weight], a(fips) cluster(fips)
-
-
-qui areg violent m1-m12 zero m14-m21 i.year i.idborder [aw = weight], a(fips) cluster(fips)
-eststo violent
-coefplot	(violent, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert keep(m9 m10 m11 m12 zero m14 m15 m16 m17) levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("years from policy") ytitle("change in violent crime, per 100,000")
-graph export "$out/eventstudy_violent_yrs_border.png", replace
-
-areg log_violent 	treat_post i.year i.idborder [aw = weight], a(fips) cluster(fips)
-
-
-qui areg property m1-m12 zero m14-m21 i.year i.idborder [aw = weight], a(fips) cluster(fips)
-eststo property
-coefplot	(property, lcolor(black) fcolor(none) mcolor(black) recast(connect) ciopts(color(gs8%30) recast(rarea))) ///
-			, vert keep(m9 m10 m11 m12 zero m14 m15 m16 m17) levels(90) ///
-			omitted yline(0, lcolor(black) lpattern(dot)) xline(17) xtitle("years from policy") ytitle("change in property crime, per 100,000")
-graph export "$out/eventstudy_property_yrs_border.png", replace
-
-areg log_tot 	treat_post i.year i.idborder [aw = weight], a(fips) cluster(fips)
-
-

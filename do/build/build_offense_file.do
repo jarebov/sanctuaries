@@ -415,7 +415,7 @@ save "$path/sanctuaries/data/temp/offense_county_month_temp_`y'.dta", replace
 
 use "$path/sanctuaries/data/temp/offense_county_month_temp_2000.dta", clear
 
-foreach y of numlist 2001/2008 2010/2016{
+foreach y of numlist 2001/2016{
 
 	append using "$path/sanctuaries/data/temp/offense_county_month_temp_`y'.dta"
 
