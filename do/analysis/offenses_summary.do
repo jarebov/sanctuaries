@@ -15,11 +15,13 @@ global user = 2 // 1 Jaime, 2 Barbara
 if $user == 1{
 cd "/Users/JAIME/Dropbox/research/sanctuaries/data/output_datasets"
 global out = "/Users/JAIME/Dropbox/research/sanctuaries/out"
+global test = "/Users/JAIME/Dropbox/research/sanctuaries/out/test"
 }
 
 if $user == 2{
 cd "~/Dropbox/Research/sanctuaries/data/output_datasets"
 global out = "~/Dropbox/Research/sanctuaries/out"
+global test = "~/Dropbox/Research/sanctuaries/out/test"
 }
 
 clear all
@@ -256,11 +258,12 @@ restore
 
 
 ** Trends in each one of the treated counties 
-levelsof fips if treat == 0, local(treated)
+levelsof fips if treat == 1, local(treated)
 foreach f of local treated {
 preserve
 keep if fips == `f'
 levelsof enactment, local(enact)
+keep if year >= 2008
 twoway (line codtot_i_rate time), title("`f'") xline(`enact')
 graph export "$test/treated`f'.png", replace
 restore
