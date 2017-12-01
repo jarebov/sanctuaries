@@ -70,3 +70,12 @@ run "$build_do/clean_countyborder.do"	//cleans county_border files
 run "$build_do/build_panel_covariates.do" // generates panel of covariates from different sources
 run "$build_do/build_treat_control.do"		// generates list of treatment and control using adjacency files and differen treatment definitions
 run "$build_do/build_panel_group.do"		// generates QUARTERLY panel of treatment and control which contains treated counties and their bordering ones. control counties appear more than once if they border with more than one treated county.
+
+
+
+
+
+***************** 	ANALYSIS	*********************************
+run "$analysis_do/desc_trends.do"		// descriptive quarterly crime time trends graphs
+
+
