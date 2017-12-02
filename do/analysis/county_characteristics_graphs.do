@@ -24,7 +24,30 @@ global out = "~/Dropbox/Research/sanctuaries/out"
 clear all
 set more off
 
-****
+
+**** Counts of policies and crime rates
+
+use offenses_county_month.dta, clear
+sort fips
+merge m:1 fips using treat_control_list.dta
+gen other = _m == 1
+
+preserve
+keep if year > 2003
+collapse tot_pop (sum) codtot_i_rate (max) treat_post, by (fips year)
+bysort year: egen Treat_post = sum(treat_post)
+collapse codtot_i_rate Treat_post [aw = tot_pop], by (year)
+twoway 	(connected cod year, lcolor(black) mcolor(black)) 			///
+		(bar Treat_post year, lcolor(gs10) fcolor(gs10) yaxis(2)) 	///
+		, ylabel(2000(500)5000) ylabel(0(50)250, axis(2)) ytitle("# offenses per 100,000") ///
+		ytitle("# no-ICE policies", axis(2)) legend(order(1 "offenses per 100,000" 2 "no-ICE policies")) xlabel(2004(2)2016)
+graph export "$out/offenses_policies.png", replace
+restore
+
+
+
+**** Covariates
+
 use offenses_county_month.dta, clear
 keep if year >= 2005
 collapse (sum) codtot_c1_i_rate, by(fips year)
