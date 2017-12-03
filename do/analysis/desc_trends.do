@@ -28,6 +28,12 @@ format quarter_enactment2 %tq
 gen timefromenact2 = time_quarter - quarter_enactment2
 gen post = timefromenact2 > 0
 
+*** Winsorize
+forvalues y = 2006/2016 {
+qui sum codtot_c1_i_rate, det
+drop if (codtot_c1_i_rate < r(p1) | codtot_c1_i_rate > r(p99)) & year == `y'
+}
+
 ****************************** TIME TRENDS (HP FILTER) ******************************
 
 * CRIME RATE LEVEL, TREND, BY TREAT CONTROL. NO WEIGHT
@@ -86,9 +92,9 @@ restore
 
 preserve
 
-	keep if  year_enactment2 <= 2016
+	keep if  year_enactment2 <= 2016 & group != 41067 // removing weird county
 	
-	keep if inrange(year,2006,2015)
+	keep if inrange(year,2006,2016)
 	
 	reg codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] 
 	predict res_codtot_c1_i_rate, residuals
@@ -107,19 +113,43 @@ preserve
 	
 restore
 
+** removing county FE
+preserve
+
+	keep if  year_enactment2 <= 2016 & group != 41067 // removing weird county
+	
+	keep if inrange(year,2006,2016)
+	
+	areg codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] , a(fips)
+	predict res_codtot_c1_i_rate, residuals
+
+	collapse res_codtot_c1_i_rate [pweight=tot_pop2000] , by(timefromenact2 treat)
+
+
+	keep if inrange(timefromenact2,-8,4)
+	
+	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
+			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
+			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
+			
+	graph export "$path/out/crime_rate_levels_eventstudy_countyFE.pdf", replace
+	
+restore
+
 ** removing pretrends
 preserve
 
-	keep if  year_enactment2 <= 2016
+	keep if  year_enactment2 <= 2016 & group != 41067 // removing weird county
 	
-	keep if inrange(year,2006,2015)
-	qui reg codtot_c1_i_rate c.year#i.fips i.treat i.time_quarter if post == 0 [pweight=tot_pop]
+	keep if inrange(year,2006,2016)
+	qui reg codtot_c1_i_rate c.year#i.fips i.treat i.time_quarter if post == 0 [pweight=tot_pop2000]
 	codebook fips
 	mat b=e(b)
 	mat b=b[1,1..381]
 	mat score res1=b
 	gen res_codtot_c1_i_rate =  codtot_c1_i_rate-  res1
-	qui reg res_codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop] 
+	qui reg res_codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] 
 	predict res2, residuals
 
 	collapse res2 [pweight=tot_pop2000], by(timefromenact2 treat)
@@ -136,6 +166,34 @@ preserve
 restore
 
 
+** removing pretrends and county FE
+preserve
+
+	keep if  year_enactment2 <= 2016 & group != 41067 // removing weird county
+	
+	keep if inrange(year,2006,2016)
+	qui areg codtot_c1_i_rate c.year#i.fips i.treat i.time_quarter if post == 0 [pweight=tot_pop2000], a(fips)
+	codebook fips
+	mat b=e(b)
+	mat b=b[1,1..381]
+	mat score res1=b
+	gen res_codtot_c1_i_rate =  codtot_c1_i_rate-  res1
+	qui areg res_codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] , a(fips)
+	predict res2, residuals
+
+	collapse res2 [pweight=tot_pop2000], by(timefromenact2 treat)
+
+	
+	keep if inrange(timefromenact2,-8,8)
+	twoway (connect res2 timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
+			(connect res2 timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
+			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
+			
+	graph export "$path/out/crime_rate_levels_eventstudy_nopretrends_countyFE.pdf", replace
+	
+restore
+
 
 
 *do it for those with policy before 2015
@@ -143,7 +201,7 @@ preserve
 
 	keep if  year_enactment2 <= 2014
 	
-	keep if inrange(year,2006,2015)
+	keep if inrange(year,2006,2016)
 	
 	reg codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] 
 	predict res_codtot_c1_i_rate, residuals
@@ -163,19 +221,44 @@ preserve
 restore
 
 
+** removing county FE
+preserve
+
+	keep if  year_enactment2 <= 2014
+	
+	keep if inrange(year,2006,2016)
+	
+	areg codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] , a(fips)
+	predict res_codtot_c1_i_rate, residuals
+
+	collapse res_codtot_c1_i_rate [pweight=tot_pop2000] , by(timefromenact2 treat)
+
+
+	keep if inrange(timefromenact2,-8,4)
+	
+	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
+			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
+			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
+			
+	graph export "$path/out/crime_rate_levels_eventstudy_countyFE_pre2015.pdf", replace
+	
+restore
+
+
 *removing pretrends
 preserve
 
 
 	keep if  year_enactment2 <= 2014
 	keep if inrange(year,2006,2016)
-	qui reg codtot_c1_i_rate c.year#i.fips i.treat i.year#i.quarter if post == 0 [pweight=tot_pop]
+	qui reg codtot_c1_i_rate c.year#i.fips i.treat i.time_quarter if post == 0 [pweight=tot_pop2000]
 	mat b=e(b)
 	mat b=b[1,1..359]
 	mat score res1=b
 	gen res_codtot_c1_i_rate =  codtot_c1_i_rate -  res1
 	qui reg res_codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop] 
-	predict res2, residuals
+	predict res2, resid
 
 	collapse res2 [pweight=tot_pop2000], by(timefromenact2 treat)
 
@@ -189,12 +272,141 @@ preserve
 
 restore
 
+*removing pretrends and county FE
+preserve
+
+
+	keep if  year_enactment2 <= 2014
+	keep if inrange(year,2006,2016)
+	qui areg codtot_c1_i_rate c.year#i.fips i.treat i.time_quarter if post == 0 [pweight=tot_pop2000], a(fips)
+	mat b=e(b)
+	mat b=b[1,1..359]
+	mat score res1=b
+	gen res_codtot_c1_i_rate =  codtot_c1_i_rate -  res1
+	qui areg res_codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop] , a(fips)
+	predict res2, resid
+
+	collapse res2 [pweight=tot_pop2000], by(timefromenact2 treat)
+
+	
+	keep if inrange(timefromenact2,-8,8)
+	twoway (connect res2 timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
+			(connect res2 timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
+			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
+	graph export "$path/out/crime_rate_levels_eventstudy_pre2015_nopretrends_nocountyFE.pdf", replace
+
+restore
 
 
 
 
+** Event study, log(crime)
+
+preserve
+
+	keep if  year_enactment2 <= 2016
+	
+	keep if inrange(year,2006,2016)
+	
+	reg lcodtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000]
+	predict res_codtot_c1_i_rate, residuals
+
+	collapse res_codtot_c1_i_rate [pweight=tot_pop2000] , by(timefromenact2 treat)
 
 
+	keep if inrange(timefromenact2,-8,4)
+	
+	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
+			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
+			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
+			
+	*graph export "$path/out/logcrime_eventstudy.pdf", replace
+	
+restore
+
+** removing county FE
+preserve
+
+	keep if  year_enactment2 <= 2016
+	
+	keep if inrange(year,2006,2016)
+	
+	areg lcodtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] , a(fips)
+	predict res_codtot_c1_i_rate, residuals
+
+	collapse res_codtot_c1_i_rate [pweight=tot_pop2000] , by(timefromenact2 treat)
+
+
+	keep if inrange(timefromenact2,-8,4)
+	
+	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
+			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
+			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
+			
+	graph export "$path/out/logcrime_eventstudy_countyFE.pdf", replace
+	
+restore
+
+
+** removing pretrends
+preserve
+
+	keep if  year_enactment2 <= 2016
+	
+	keep if inrange(year,2006,2016)
+	qui reg lcodtot_c1_i_rate c.year#i.fips i.treat i.time_quarter if post == 0 [pweight=tot_pop2000]
+	codebook fips
+	mat b=e(b)
+	mat b=b[1,1..381]
+	mat score res1=b
+	gen res_codtot_c1_i_rate =  lcodtot_c1_i_rate-  res1
+	qui reg res_codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] 
+	predict res2, residuals
+
+	collapse res2 [pweight=tot_pop2000], by(timefromenact2 treat)
+
+	
+	keep if inrange(timefromenact2,-8,4)
+	twoway (connect res2 timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
+			(connect res2 timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
+			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
+			
+	* graph export "$path/out/logcrime_eventstudy_nopretrends.pdf", replace
+	
+restore
+
+
+** removing pretrends and county FE
+preserve
+
+	keep if  year_enactment2 <= 2016
+	
+	keep if inrange(year,2006,2016)
+	qui areg lcodtot_c1_i_rate c.year#i.fips i.treat i.time_quarter if post == 0 [pweight=tot_pop2000], a(fips)
+	codebook fips
+	mat b=e(b)
+	mat b=b[1,1..381]
+	mat score res1=b
+	gen res_codtot_c1_i_rate =  lcodtot_c1_i_rate -  res1
+	qui areg res_codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] , a(fips)
+	predict res2, residuals
+
+	collapse res2 [pweight=tot_pop2000], by(timefromenact2 treat)
+
+	
+	keep if inrange(timefromenact2,-8,8)
+	twoway (connect res2 timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
+			(connect res2 timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
+			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
+			
+	* graph export "$path/out/logcrime_eventstudy_nopretrends_countyFE.pdf", replace
+	
+restore
 
 
 
