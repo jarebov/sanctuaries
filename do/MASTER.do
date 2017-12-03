@@ -76,6 +76,12 @@ run "$build_do/build_panel_group.do"		// generates QUARTERLY panel of treatment 
 
 
 ***************** 	ANALYSIS	*********************************
-run "$analysis_do/desc_trends.do"		// descriptive quarterly crime time trends graphs
+run "$analysis_do/balance_table.do"						// table of sumstats: US, treated, and bordering
+run "$analysis_do/county_characteristics_graphs.do"		// histograms of main characteristics: US, treated, and bordering
+run "$analysis_do/desc_trends.do"						// descriptive quarterly crime time trends graphs and event study graphs
+run "$analysis_do/offenses.do"							// diff-in-diff, all crimes
+run "$analysis_do/violent.do"							// diff-in-diff, violent crimes
+run "$analysis_do/property.do"							// diff-in-diff, property crimes
+run "$analysis_do/offenses_by_hispanic.do"				// diff-in-diff, all/violent/property crimes, by quartile of hispanic pop
 
 
