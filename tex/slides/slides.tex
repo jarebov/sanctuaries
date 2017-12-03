@@ -47,7 +47,7 @@
   
   
   %%% THE LINE BELOW MUST BE CHANGED WITH FOLDER IN USE!!
-\newcommand{\tablesfolder}{/Users/bbiasi/Dropbox/Research/sanctuaries/out}  
+\newcommand{\tablesfolder}{/Users/bbiasi/Dropbox/Research/sanctuaries/sanctuaries_git/tex/tables}  
 
 
   %%% THE LINE BELOW MUST BE CHANGED WITH FOLDER IN USE!!
@@ -404,6 +404,89 @@ Table
 \footnotesize{Note: crime rates per 100,000, conditional on no-ICE, quarter-year}
 \end{center}
 \end{frame}
+
+\begin{frame}{Total crime}
+\footnotesize
+\begin{center}
+OLS - Dependent variable is ln(offenses/100,000)\\
+\input{\tablesfolder/logcrime_dd1.tex}
+\\\footnotesize{Note: SEs clustered at the county level}
+\end{center}
+\end{frame}
+
+\begin{frame}{Total crime}
+\footnotesize
+\begin{center}
+OLS - Dependent variable is ln(offenses/100,000)\\
+\input{\tablesfolder/logcrime_dd2.tex}
+\\\footnotesize{Note: SEs clustered at the county level}
+\end{center}
+\end{frame}
+
+\begin{frame}{Violent crime}
+\footnotesize
+\begin{center}
+OLS - Dependent variable is ln(violent offenses/100,000)\\
+\input{\tablesfolder/logviolent_dd1.tex}
+\\\footnotesize{Note: SEs clustered at the county level}
+\end{center}
+\end{frame}
+
+\begin{frame}{Violent crime}
+\footnotesize
+\begin{center}
+OLS - Dependent variable is ln(violent offenses/100,000)\\
+\input{\tablesfolder/logviolent_dd2.tex}
+\\\footnotesize{Note: SEs clustered at the county level}
+\end{center}
+\end{frame}
+
+\begin{frame}{Property crime}
+\footnotesize
+\begin{center}
+OLS - Dependent variable is ln(property offenses/100,000)\\
+\input{\tablesfolder/logproperty_dd1.tex}
+\\\footnotesize{Note: SEs clustered at the county level}
+\end{center}
+\end{frame}
+
+\begin{frame}{Property crime}
+\footnotesize
+\begin{center}
+OLS - Dependent variable is ln(property offenses/100,000)\\
+\input{\tablesfolder/logproperty_dd2.tex}
+\\\footnotesize{Note: SEs clustered at the county level}
+\end{center}
+\end{frame}
+
+\begin{frame}{Total crime - by Share Hispanic}
+\footnotesize
+\begin{center}
+OLS - Dependent variable is ln(offenses/100,000)\\
+\input{\tablesfolder/logcrime_byhisp_dd1.tex}
+\\\footnotesize{Note: SEs clustered at the county level}
+\end{center}
+\end{frame}
+
+\begin{frame}{Violent crime - by Share Hispanic}
+\footnotesize
+\begin{center}
+OLS - Dependent variable is ln(violent offenses/100,000)\\
+\input{\tablesfolder/logviolent_byhisp_dd1.tex}
+\\\footnotesize{Note: SEs clustered at the county level}
+\end{center}
+\end{frame}
+
+
+\begin{frame}{Property crime - by Share Hispanic}
+\footnotesize
+\begin{center}
+OLS - Dependent variable is ln(property offenses/100,000)\\
+\input{\tablesfolder/logproperty_byhisp_dd1.tex}
+\\\footnotesize{Note: SEs clustered at the county level}
+\end{center}
+\end{frame}
+
 
 % things do to: include time-varying controls, county-specific time trends (Miles and Cox show that they matter!!), and control for secure communities, see if the effect is different for counties with high share of immigrants
 
