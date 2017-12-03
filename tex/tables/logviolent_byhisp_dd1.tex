@@ -1,0 +1,30 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular*}{0.7\textwidth}{@{\hskip\tabcolsep\extracolsep\fill}l*{4}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\
+\hline
+no-detainer $\times$ post $\times$ q1&     -0.0519\sym{**} &     -0.0359         &     -0.0551         &     -0.0277         \\
+                    &    (0.0248)         &    (0.0220)         &    (0.0346)         &    (0.0328)         \\
+[1em]
+no-detainer $\times$ post $\times$ q2&     -0.0135         &      0.0004         &     -0.0070         &      0.0119         \\
+                    &    (0.0435)         &    (0.0438)         &    (0.0489)         &    (0.0525)         \\
+[1em]
+no-detainer $\times$ post $\times$ q3&      0.0105         &      0.0289         &      0.0167         &      0.0286         \\
+                    &    (0.0202)         &    (0.0181)         &    (0.0232)         &    (0.0223)         \\
+[1em]
+no-detainer $\times$ post $\times$ q4&      0.0277         &      0.0159         &      0.0432         &      0.0350\sym{*}  \\
+                    &    (0.0313)         &    (0.0170)         &    (0.0317)         &    (0.0208)         \\
+[1em]
+County FE           &         Yes         &         Yes         &         Yes         &         Yes         \\
+[1em]
+Time FE             &          No         &         Yes         &          No         &         Yes         \\
+[1em]
+Controls            &          No         &         Yes         &          No         &         Yes         \\
+[1em]
+Trends              &          No         &          No         &         Yes         &         Yes         \\
+\hline
+Observations        &        6572         &        6531         &        6572         &        6531         \\
+\hline\hline
+\end{tabular*}
+}

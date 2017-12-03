@@ -1,0 +1,23 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular*}{0.7\textwidth}{@{\hskip\tabcolsep\extracolsep\fill}l*{4}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\
+\hline
+no-detainer $\times$ post&      0.0044         &      0.0134\sym{*}  &      0.0243\sym{*}  &      0.0209         \\
+                    &         (.)         &    (0.0077)         &    (0.0124)         &    (0.0147)         \\
+[1em]
+County FE           &         Yes         &         Yes         &         Yes         &         Yes         \\
+[1em]
+Group-by-year FE    &         Yes         &         Yes         &         Yes         &         Yes         \\
+[1em]
+Time FE             &          No         &         Yes         &          No         &         Yes         \\
+[1em]
+Controls            &          No         &         Yes         &          No         &         Yes         \\
+[1em]
+Trends              &          No         &          No         &         Yes         &         Yes         \\
+\hline
+Observations        &        6572         &        6531         &        6572         &        6531         \\
+\hline\hline
+\end{tabular*}
+}
