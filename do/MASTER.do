@@ -76,6 +76,7 @@ run "$build_do/build_panel_group.do"		// generates QUARTERLY panel of treatment 
 
 
 ***************** 	ANALYSIS	*********************************
+run "$analysis_do/plot_trends_all_counties.do"			// plots and saves a time trend for each sample county (treat and control) in out/visual_trends/ so that we can spot bad data points
 run "$analysis_do/balance_table.do"						// table of sumstats: US, treated, and bordering
 run "$analysis_do/county_characteristics_graphs.do"		// histograms of main characteristics: US, treated, and bordering
 run "$analysis_do/desc_trends.do"						// descriptive quarterly crime time trends graphs and event study graphs

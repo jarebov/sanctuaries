@@ -15,24 +15,6 @@ use "$path/data/output_datasets/offense_panel_group.dta", clear
 sort group fips time_quarter
 
 
-* Generate necessary variables
-gen lcodtot_c1_i_rate = ln(codtot_c1_i_rate) //log crime rate
-gen quarter = quarter(dofq(time_quarter)) //calendar quarter (1,2,3,4)
-gen year_en = year(dofq(quarter_enactment)) //calendar year of enactment
-bysort fips (year): gen tot_pop2000 = tot_pop[1] //baseline population (year 2000)
-bysort fips time_quarter: gen obsfips = _n //keep track duplicate control counties
-gen timefromenact = time_quarter - quarter_enactment
-egen quarter_enactment2 = mean(quarter_enactment), by(group) //assign quarter of enactment to control units 
-egen year_enactment2 = mean(year_en), by(group) //assign year of enactment to control units 
-format quarter_enactment2 %tq
-gen timefromenact2 = time_quarter - quarter_enactment2
-gen post = timefromenact2 > 0
-
-*** Winsorize
-forvalues y = 2006/2016 {
-qui sum codtot_c1_i_rate, det
-drop if (codtot_c1_i_rate < r(p1) | codtot_c1_i_rate > r(p99)) & year == `y'
-}
 
 ****************************** TIME TRENDS (HP FILTER) ******************************
 

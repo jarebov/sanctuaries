@@ -444,6 +444,27 @@ foreach k in 0 1 2 3{
 	label var codtot_c`k'_i "sum count of all 7 index crimes card `k'- smoothed"
 }
 
+
+
+**Violent and non-violent crime aggregation
+foreach k in 0 1 2 3{
+	gen codviolent_c`k'    = cod1_c`k' + cod3_c`k' + cod6_c`k' + cod11_c`k'
+	gen codnonviolent_c`k' = cod17_c`k' + cod21_c`k' + cod23_c`k'
+	
+	label var codviolent_c`k' "violent count card `k'"
+	label var codnonviolent_c`k' "non-violent count card `k'"
+	
+	
+	gen codviolent_c`k'_i    = cod1_c`k'_i + cod3_c`k'_i + cod6_c`k'_i + cod11_c`k'_i
+	gen codnonviolent_c`k'_i = cod17_c`k'_i + cod21_c`k'_i + cod23_c`k'_i
+	
+	label var codviolent_c`k'_i "violent count card `k'- smoothed"
+	label var codnonviolent_c`k'_i "non-violent count card `k'- smoothed"
+
+
+}
+
+
 *merge population data
 merge m:1 fips year using "$path/sanctuaries/data/output_datasets/population.dta"
 drop if _merge==2
@@ -484,6 +505,71 @@ drop _merge
 
 	/*county 51730: Extreme outlier 2006m7*/
 	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+1])/2 if fips==51730 & time==tm(2006m7)
+	
+	/*county 22501: Extreme outliers 2005q4. Interpolate*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+4])/2 if fips==22051 & time==tm(2005m9)
+	replace codtot_c1_i = (codtot_c1_i[_n-2]+codtot_c1_i[_n+3])/2 if fips==22051 & time==tm(2005m10)
+	replace codtot_c1_i = (codtot_c1_i[_n-3]+codtot_c1_i[_n+2])/2 if fips==22051 & time==tm(2005m11)
+	replace codtot_c1_i = (codtot_c1_i[_n-4]+codtot_c1_i[_n+1])/2 if fips==22051 & time==tm(2005m12)
+	
+	/*county 22087: 2006 is entirely missing. 2005m7-m12 are zeroes. Replace 2005m7-m12 to average 2005m1-m6. 2006 left missing*/
+	replace codtot_c1_i = (codtot_c1_i[_n-6]+codtot_c1_i[_n-5]+codtot_c1_i[_n-4]+codtot_c1_i[_n-3]+codtot_c1_i[_n-2]+codtot_c1_i[_n-1])/6 if fips==22087 & time==tm(2005m7)
+	replace codtot_c1_i = (codtot_c1_i[_n-7]+codtot_c1_i[_n-6]+codtot_c1_i[_n-5]+codtot_c1_i[_n-4]+codtot_c1_i[_n-3]+codtot_c1_i[_n-2])/6 if fips==22087 & time==tm(2005m8)
+	replace codtot_c1_i = (codtot_c1_i[_n-8]+codtot_c1_i[_n-7]+codtot_c1_i[_n-6]+codtot_c1_i[_n-5]+codtot_c1_i[_n-4]+codtot_c1_i[_n-3])/6 if fips==22087 & time==tm(2005m9)
+	replace codtot_c1_i = (codtot_c1_i[_n-9]+codtot_c1_i[_n-8]+codtot_c1_i[_n-7]+codtot_c1_i[_n-6]+codtot_c1_i[_n-5]+codtot_c1_i[_n-4])/6 if fips==22087 & time==tm(2005m10)
+	replace codtot_c1_i = (codtot_c1_i[_n-10]+codtot_c1_i[_n-9]+codtot_c1_i[_n-8]+codtot_c1_i[_n-7]+codtot_c1_i[_n-6]+codtot_c1_i[_n-5])/6 if fips==22087 & time==tm(2005m11)
+	replace codtot_c1_i = (codtot_c1_i[_n-11]+codtot_c1_i[_n-10]+codtot_c1_i[_n-9]+codtot_c1_i[_n-8]+codtot_c1_i[_n-7]+codtot_c1_i[_n-6])/6 if fips==22087 & time==tm(2005m12)
+	
+	/*county 22071: Extreme outliers 2005q3&q4. Interpolate*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+6])/2 if fips==22071 & time==tm(2005m7)
+	replace codtot_c1_i = (codtot_c1_i[_n-2]+codtot_c1_i[_n+5])/2 if fips==22071 & time==tm(2005m8)	
+	replace codtot_c1_i = (codtot_c1_i[_n-3]+codtot_c1_i[_n+4])/2 if fips==22071 & time==tm(2005m9)
+	replace codtot_c1_i = (codtot_c1_i[_n-4]+codtot_c1_i[_n+3])/2 if fips==22071 & time==tm(2005m10)
+	replace codtot_c1_i = (codtot_c1_i[_n-5]+codtot_c1_i[_n+2])/2 if fips==22071 & time==tm(2005m11)
+	replace codtot_c1_i = (codtot_c1_i[_n-6]+codtot_c1_i[_n+1])/2 if fips==22071 & time==tm(2005m12)
+	
+	/*county 35028: Implausible zeroes in 2009q3&q4, 2013q2. Interpolate*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+6])/2 if fips==35028 & time==tm(2009m7)
+	replace codtot_c1_i = (codtot_c1_i[_n-2]+codtot_c1_i[_n+5])/2 if fips==35028 & time==tm(2009m8)	
+	replace codtot_c1_i = (codtot_c1_i[_n-3]+codtot_c1_i[_n+4])/2 if fips==35028 & time==tm(2009m9)
+	replace codtot_c1_i = (codtot_c1_i[_n-4]+codtot_c1_i[_n+3])/2 if fips==35028 & time==tm(2009m10)
+	replace codtot_c1_i = (codtot_c1_i[_n-5]+codtot_c1_i[_n+2])/2 if fips==35028 & time==tm(2009m11)
+	replace codtot_c1_i = (codtot_c1_i[_n-6]+codtot_c1_i[_n+1])/2 if fips==35028 & time==tm(2009m12)
+	
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+6])/2 if fips==35028 & time==tm(2013m4)
+	replace codtot_c1_i = (codtot_c1_i[_n-2]+codtot_c1_i[_n+5])/2 if fips==35028 & time==tm(2013m5)	
+	replace codtot_c1_i = (codtot_c1_i[_n-3]+codtot_c1_i[_n+4])/2 if fips==35028 & time==tm(2013m6)
+	
+	/*county 41035: Extreme outlier 2006m12*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+1])/2 if fips==41035 & time==tm(2006m12)
+	
+	/*county 41051: 2015q2,q3,q4 missing. Interpolate*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+9])/2 if fips==41051 & time==tm(2015m4)
+	replace codtot_c1_i = (codtot_c1_i[_n-2]+codtot_c1_i[_n+8])/2 if fips==41051 & time==tm(2015m5)	
+	replace codtot_c1_i = (codtot_c1_i[_n-3]+codtot_c1_i[_n+7])/2 if fips==41051 & time==tm(2015m6)
+	replace codtot_c1_i = (codtot_c1_i[_n-4]+codtot_c1_i[_n+6])/2 if fips==41051 & time==tm(2015m7)
+	replace codtot_c1_i = (codtot_c1_i[_n-5]+codtot_c1_i[_n+5])/2 if fips==41051 & time==tm(2015m8)
+	replace codtot_c1_i = (codtot_c1_i[_n-6]+codtot_c1_i[_n+4])/2 if fips==41051 & time==tm(2015m9)
+	replace codtot_c1_i = (codtot_c1_i[_n-7]+codtot_c1_i[_n+3])/2 if fips==41051 & time==tm(2015m10)
+	replace codtot_c1_i = (codtot_c1_i[_n-8]+codtot_c1_i[_n+2])/2 if fips==41051 & time==tm(2015m11)
+	replace codtot_c1_i = (codtot_c1_i[_n-9]+codtot_c1_i[_n+1])/2 if fips==41051 & time==tm(2015m12)
+	
+	/*county 41067: 2015q2,q3,q4 missing. Interpolate*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+9])/2 if fips==41067 & time==tm(2015m4)
+	replace codtot_c1_i = (codtot_c1_i[_n-2]+codtot_c1_i[_n+8])/2 if fips==41067 & time==tm(2015m5)	
+	replace codtot_c1_i = (codtot_c1_i[_n-3]+codtot_c1_i[_n+7])/2 if fips==41067 & time==tm(2015m6)
+	replace codtot_c1_i = (codtot_c1_i[_n-4]+codtot_c1_i[_n+6])/2 if fips==41067 & time==tm(2015m7)
+	replace codtot_c1_i = (codtot_c1_i[_n-5]+codtot_c1_i[_n+5])/2 if fips==41067 & time==tm(2015m8)
+	replace codtot_c1_i = (codtot_c1_i[_n-6]+codtot_c1_i[_n+4])/2 if fips==41067 & time==tm(2015m9)
+	replace codtot_c1_i = (codtot_c1_i[_n-7]+codtot_c1_i[_n+3])/2 if fips==41067 & time==tm(2015m10)
+	replace codtot_c1_i = (codtot_c1_i[_n-8]+codtot_c1_i[_n+2])/2 if fips==41067 & time==tm(2015m11)
+	replace codtot_c1_i = (codtot_c1_i[_n-9]+codtot_c1_i[_n+1])/2 if fips==41067 & time==tm(2015m12)
+	
+	/*county 53071: Extreme outlier 2013m3*/
+	replace codtot_c1_i = (codtot_c1_i[_n-1]+codtot_c1_i[_n+1])/2 if fips==53071 & time==tm(2013m3)
+	
+	
+	
 ************************
 
 
@@ -506,8 +592,14 @@ foreach k in 0 1 2 3{
 	label var cod17_c`k'_rate "burglary per 100,000 card `k'"
 	label var cod21_c`k'_rate "larceny per 100,000 card `k'"
 	label var cod23_c`k'_rate "auto theft per 100,000 card `k'"
+	
 	label var codtot_c`k'_rate "all 7 index crimes per 100,000 card `k'"
+	
+	label var codviolent_c`k'_rate "violent per 100,000 card `k'"
+	label var codnonviolent_c`k'_rate "non-violent per 100,000 card `k'"
 
+	
+	
 	label var cod1_c`k'_i_rate "murder per 100,000 card `k' - smoothed"
 	label var cod3_c`k'_i_rate "rape per 100,000 card `k' - smoothed"
 	label var cod6_c`k'_i_rate "robbery per 100,000 card `k' - smoothed"
@@ -515,7 +607,11 @@ foreach k in 0 1 2 3{
 	label var cod17_c`k'_i_rate "burglary per 100,000 card `k' - smoothed"
 	label var cod21_c`k'_i_rate "larceny per 100,000 card `k' - smoothed"
 	label var cod23_c`k'_i_rate "auto theft per 100,000 card `k' - smoothed"
+	
 	label var codtot_c`k'_i_rate "all 7 index crimes per 100,000 card `k' - smoothed"
+	
+	label var codviolent_c`k'_i_rate "violent per 100,000 card `k'- smoothed"
+	label var codnonviolent_c`k'_i_rate "non-violent per 100,000 card `k'- smoothed"
 }
 
 
@@ -529,6 +625,7 @@ foreach v of varlist cod* {
 	replace `v' = 0 if `v'<0
 
 }
+
 
 
 
