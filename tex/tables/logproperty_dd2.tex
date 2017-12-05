@@ -1,11 +1,11 @@
 {
 \def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
-\begin{tabular*}{0.7\textwidth}{@{\hskip\tabcolsep\extracolsep\fill}l*{4}{c}}
+\begin{tabular}{l*{4}{c}}
 \hline\hline
                     &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         \\
 \hline
-no-detainer $\times$ post&      0.0163         &      0.0227\sym{*}  &      0.0060         &      0.0140         \\
-                    &         (.)         &    (0.0121)         &    (0.0118)         &    (0.0173)         \\
+no-detainer $\times$ post&      0.0328\sym{**} &      0.0418\sym{**} &      0.0259\sym{*}  &      0.0375\sym{**} \\
+                    &    (0.0163)         &    (0.0169)         &    (0.0150)         &    (0.0151)         \\
 [1em]
 County FE           &         Yes         &         Yes         &         Yes         &         Yes         \\
 [1em]
@@ -17,7 +17,7 @@ Controls            &          No         &         Yes         &          No   
 [1em]
 Trends              &          No         &          No         &         Yes         &         Yes         \\
 \hline
-Observations        &        6609         &        6564         &        6609         &        6564         \\
+Observations        &        6157         &        6112         &        6157         &        6112         \\
 \hline\hline
-\end{tabular*}
+\end{tabular}
 }
