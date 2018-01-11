@@ -96,12 +96,12 @@ label define Treat 0 "other" 1 "control" 2 "treated"
 label values Treat Treat
 
 eststo s1: estpost tabstat	$var [aw = tot_pop], by(Treat) statistics(mean sd) columns(statistics) listwise
-esttab s1 using $out/balance_all.tex, main(mean) aux(sd) nostar unstack nonote label replace noisily nogaps
+esttab s1 using $out/balance_all.xls, main(mean) aux(sd) nostar unstack nonote label replace noisily nogaps
 
 foreach var in $var {
 eststo `var': reg `var' treat [aw = tot_pop]
 }
-esttab	$var  using $out/balance_treatcontrol_ttest.tex	///
+esttab	$var  using $out/balance_treatcontrol_ttest.xls	///
 		, b(4) se(4) unstack nonote label replace se keep(treat) star(* 0.10 ** 0.05 *** 0.01)
 eststo clear 
 
@@ -111,7 +111,7 @@ replace treat = 0 if treat == .
 foreach var in $var {
 eststo `var': reg `var' treat [aw = tot_pop]
 }
-esttab	$var  using $out/balance_all_ttest.tex	///
+esttab	$var  using $out/balance_all_ttest.xls	///
 		, b(4) se(4) unstack nonote label replace se keep(treat) star(* 0.10 ** 0.05 *** 0.01)
 restore		
 
@@ -134,6 +134,7 @@ rm temp.dta
 foreach var in $var {
 eststo `var': areg `var' treat [aw = tot_pop], a(group) 
 }
-esttab	$var  using $out/balance_treatcontrol_groupFE.tex	///
+esttab	$var  using $out/balance_treatcontrol_groupFE.xls	///
+		, b(4) se(4) unstack nonote label replace se keep(treat) star(* 0.10 ** 0.05 *** 0.01)
 
 log close
