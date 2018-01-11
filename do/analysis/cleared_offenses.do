@@ -63,6 +63,8 @@ gen county = 0
 gen trend = 0
 gen Gr = 0
 gen cleared = codtot_c2_i_rate_w/codtot_c1_i_rate_w
+gen cleared_v = codviolent_c2_i_rate_w/codviolent_c1_i_rate_w
+gen cleared_p = codnonviolent_c2_i_rate_w/codnonviolent_c1_i_rate_w
 
 keep if year >= 2006 & year_enactment2 <= 2016
 
@@ -83,56 +85,93 @@ label variable treat_post_hisp4 "no-detainer $\times$ post $\times$ q4"
 
 ********************************************		Regressions 	******************************************************
 
-* Table 1: simple DD, county FE, county FE with pre-trends, with and without covariates 
+* Total crime
 eststo t1: qui areg cleared treat_post i.time_quarter county if timeframe == 1 & cleared < 1 [aw = tot_pop2000], a(fips) cluster(fips)
 disp _b[treat_post]
 disp _b[treat_post]/_se[treat_post]
-disp e(N)
+qui sum cleared if e(sample)
+estadd scalar Ymean = r(mean)
 
 eststo t2: qui areg cleared treat_post i.time_quarter $covar2 county if timeframe == 1 & cleared < 1 [aw = tot_pop2000], a(fips) cluster(fips)
 disp _b[treat_post]
 disp _b[treat_post]/_se[treat_post]
-disp e(N)
+qui sum cleared if e(sample)
+estadd scalar Ymean = r(mean)
 
-eststo t3: qui areg cleared_dt treat_post i.time_quarter county trend if timeframe == 1 & cleared < 1 [aw = tot_pop2000], a(fips) cluster(fips)
+eststo t3: qui areg cleared treat_post i.time_quarter i.fips county Gr if timeframe == 1  & cleared < 1 [aw = tot_pop2000], a(group_year) cluster(group_year)
 disp _b[treat_post]
 disp _b[treat_post]/_se[treat_post]
-disp e(N)
+qui sum cleared if e(sample)
+estadd scalar Ymean = r(mean)
 
-eststo t4: qui areg cleared_dt treat_post i.time_quarter $covar2 county trend if timeframe == 1 [aw = tot_pop2000], a(fips) cluster(fips)
+eststo t4: qui areg cleared treat_post i.time_quarter i.fips county $covar2 Gr if timeframe == 1 & cleared < 1 [aw = tot_pop2000], a(group_year) cluster(fips)
 disp _b[treat_post]
 disp _b[treat_post]/_se[treat_post]
-disp e(N)
+qui sum cleared if e(sample)
+estadd scalar Ymean = r(mean)
 
-esttab	t1 t2 t3 t4 using "$tab/logcrime_dd1.tex"	///
-		, b(4) se(4) unstack nonote label replace se keep(treat_post) indicate("County FE = *county*" "Time FE = *year*" "Controls = urate" "Trends = trend") ///
-		nomti obslast star(* 0.10 ** 0.05 *** 0.01) 
+esttab	t1 t2 t3 t4 using "$tab/logcrime_cleared_dd.tex"	///
+		, b(4) se(4) unstack nonote label replace se keep(treat_post) indicate("County FE = *county*" "Group-by-time FE = *Gr*" "Time FE = *time*" "Controls = urate") ///
+		nomti obslast star(* 0.10 ** 0.05 *** 0.01)  stats(Ymean)
 
 
-* Table 2: group-by-year FE, with pre-trends, with and without covariates 
-eststo t1: qui areg cleared treat_post i.time_quarter i.fips Gr if timeframe == 1  & cleared < 1 [aw = tot_pop2000], a(group_year) cluster(group_year)
+* Violent crime
+eststo t1: qui areg cleared_v treat_post i.time_quarter county if timeframe == 1 & cleared_v < 1 [aw = tot_pop2000], a(fips) cluster(fips)
 disp _b[treat_post]
 disp _b[treat_post]/_se[treat_post]
-disp e(N)
+qui sum cleared_v if e(sample)
+estadd scalar Ymean = r(mean)
 
-eststo t2: qui areg cleared treat_post i.time_quarter i.fips $covar2 Gr if timeframe == 1 & cleared < 1 [aw = tot_pop2000], a(group_year) cluster(fips)
+eststo t2: qui areg cleared_v treat_post i.time_quarter $covar2 county if timeframe == 1 & cleared_v < 1 [aw = tot_pop2000], a(fips) cluster(fips)
 disp _b[treat_post]
 disp _b[treat_post]/_se[treat_post]
-disp e(N)
+qui sum cleared_v if e(sample)
+estadd scalar Ymean = r(mean)
 
-eststo t3: qui areg lcodtot_c1_i_rate_w_dt treat_post i.time_quarter i.fips Gr trend if timeframe == 1 & cleared < 1 [aw = tot_pop2000], a(group_year) cluster(group_year)
+eststo t3: qui areg cleared_v treat_post i.time_quarter i.fips county Gr if timeframe == 1  & cleared_v < 1 [aw = tot_pop2000], a(group_year) cluster(group_year)
 disp _b[treat_post]
 disp _b[treat_post]/_se[treat_post]
-disp e(N)
+qui sum cleared_v if e(sample)
+estadd scalar Ymean = r(mean)
 
-eststo t4: qui areg lcodtot_c1_i_rate_w_dt treat_post i.time_quarter i.fips $covar2 Gr trend if timeframe == 1 & cleared < 1 [aw = tot_pop2000], a(group_year) cluster(fips)
+eststo t4: qui areg cleared_v treat_post i.time_quarter i.fips county $covar2 Gr if timeframe == 1 & cleared_v < 1 [aw = tot_pop2000], a(group_year) cluster(fips)
 disp _b[treat_post]
 disp _b[treat_post]/_se[treat_post]
-disp e(N)
+qui sum cleared_v if e(sample)
+estadd scalar Ymean = r(mean)
 
-esttab	t1 t2 t3 t4 using "$tab/logcrime_dd2.tex"	///
-		, b(4) se(4) unstack nonote label replace se keep(treat_post) indicate("County FE = *fips*" "Group-by-year FE = *Gr*" "Time FE = *year*" "Controls = urate" "Trends = trend") ///
-		nomti obslast star(* 0.10 ** 0.05 *** 0.01) 
+esttab	t1 t2 t3 t4 using "$tab/logviolent_cleared_dd.tex"	///
+		, b(4) se(4) unstack nonote label replace se keep(treat_post) indicate("County FE = *county*" "Group-by-time FE = *Gr*" "Time FE = *time*" "Controls = urate") ///
+		nomti obslast star(* 0.10 ** 0.05 *** 0.01)  stats(Ymean)
 
-		
+
+
+* Property crime
+eststo t1: qui areg cleared_p treat_post i.time_quarter county if timeframe == 1 & cleared_p < 1 [aw = tot_pop2000], a(fips) cluster(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+qui sum cleared_p if e(sample)
+estadd scalar Ymean = r(mean)
+
+eststo t2: qui areg cleared_p treat_post i.time_quarter $covar2 county if timeframe == 1 & cleared_p < 1 [aw = tot_pop2000], a(fips) cluster(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+qui sum cleared_p if e(sample)
+estadd scalar Ymean = r(mean)
+
+eststo t3: qui areg cleared_p treat_post i.time_quarter i.fips county Gr if timeframe == 1  & cleared_p < 1 [aw = tot_pop2000], a(group_year) cluster(group_year)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+qui sum cleared_p if e(sample)
+estadd scalar Ymean = r(mean)
+
+eststo t4: qui areg cleared_p treat_post i.time_quarter i.fips county $covar2 Gr if timeframe == 1 & cleared_p < 1 [aw = tot_pop2000], a(group_year) cluster(fips)
+disp _b[treat_post]
+disp _b[treat_post]/_se[treat_post]
+qui sum cleared_p if e(sample)
+estadd scalar Ymean = r(mean)
+
+esttab	t1 t2 t3 t4 using "$tab/lognonviolent_cleared_dd.tex"	///
+		, b(4) se(4) unstack nonote label replace se keep(treat_post) indicate("County FE = *county*" "Group-by-time FE = *Gr*" "Time FE = *time*" "Controls = urate") ///
+		nomti obslast star(* 0.10 ** 0.05 *** 0.01)  stats(Ymean)
 
