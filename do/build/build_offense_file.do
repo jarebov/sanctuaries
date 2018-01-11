@@ -479,6 +479,8 @@ drop _merge
 ****some within-county outliers that seem like obvious mistakes in coding. fix them
 	sort fips time
 
+	*TOTAL CRIME*
+	
 	/*county 6001: 2003m12 looks like an extreme upwards outlier and 2004m1, 2004m2 extreme downwards outliers. 
 	Might be the case that 2003m12 is capturing data from 2004m1-m2. smooth over those three months*/
 	gen codtot_c1_iB = codtot_c1_i
@@ -570,6 +572,41 @@ drop _merge
 	
 	
 	
+	*VIOLENT CRIME*
+	
+	/*county 35028: suspicious zeros 2013q2. Interpolate. Also, 2009 q3 and q4 are missing.*/
+	replace codviolent_c1_i = (codviolent_c1_i[_n-1]+codviolent_c1_i[_n+3])/2 if fips==35028 & time==tm(2013m4)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-2]+codviolent_c1_i[_n+2])/2 if fips==35028 & time==tm(2013m5)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-3]+codviolent_c1_i[_n+1])/2 if fips==35028 & time==tm(2013m6)
+	
+	replace codviolent_c1_i = (codviolent_c1_i[_n-1]+codviolent_c1_i[_n+6])/2 if fips==35028 & time==tm(2009m7)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-2]+codviolent_c1_i[_n+5])/2 if fips==35028 & time==tm(2009m8)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-3]+codviolent_c1_i[_n+4])/2 if fips==35028 & time==tm(2009m9)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-4]+codviolent_c1_i[_n+3])/2 if fips==35028 & time==tm(2009m10)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-5]+codviolent_c1_i[_n+2])/2 if fips==35028 & time==tm(2009m11)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-6]+codviolent_c1_i[_n+1])/2 if fips==35028 & time==tm(2009m12)
+	
+	/*county 41051: 2015 q2, q3, q4 missing. Interpolate */
+	replace codviolent_c1_i = (codviolent_c1_i[_n-1]+codviolent_c1_i[_n+9])/2 if fips==41051 & time==tm(2015m4)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-2]+codviolent_c1_i[_n+8])/2 if fips==41051 & time==tm(2015m5)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-3]+codviolent_c1_i[_n+7])/2 if fips==41051 & time==tm(2015m6)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-4]+codviolent_c1_i[_n+6])/2 if fips==41051 & time==tm(2015m7)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-5]+codviolent_c1_i[_n+5])/2 if fips==41051 & time==tm(2015m8)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-6]+codviolent_c1_i[_n+4])/2 if fips==41051 & time==tm(2015m9)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-7]+codviolent_c1_i[_n+3])/2 if fips==41051 & time==tm(2015m10)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-8]+codviolent_c1_i[_n+2])/2 if fips==41051 & time==tm(2015m11)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-9]+codviolent_c1_i[_n+1])/2 if fips==41051 & time==tm(2015m12)
+	
+	/*county 41067: 2015 q2, q3, q4 missing. Interpolate */
+	replace codviolent_c1_i = (codviolent_c1_i[_n-1]+codviolent_c1_i[_n+9])/2 if fips==41067 & time==tm(2015m4)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-2]+codviolent_c1_i[_n+8])/2 if fips==41067 & time==tm(2015m5)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-3]+codviolent_c1_i[_n+7])/2 if fips==41067 & time==tm(2015m6)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-4]+codviolent_c1_i[_n+6])/2 if fips==41067 & time==tm(2015m7)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-5]+codviolent_c1_i[_n+5])/2 if fips==41067 & time==tm(2015m8)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-6]+codviolent_c1_i[_n+4])/2 if fips==41067 & time==tm(2015m9)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-7]+codviolent_c1_i[_n+3])/2 if fips==41067 & time==tm(2015m10)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-8]+codviolent_c1_i[_n+2])/2 if fips==41067 & time==tm(2015m11)
+	replace codviolent_c1_i = (codviolent_c1_i[_n-9]+codviolent_c1_i[_n+1])/2 if fips==41067 & time==tm(2015m12)
 ************************
 
 
