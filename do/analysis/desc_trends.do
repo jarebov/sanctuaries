@@ -79,7 +79,7 @@ preserve
 	
 	keep if inrange(year,2006,2016)
 	
-	reg codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] 
+	reg codtot_c1_i_rate_w i.treat i.time_quarter [pweight=tot_pop2000] 
 	predict res_codtot_c1_i_rate, residuals
 
 	collapse res_codtot_c1_i_rate [pweight=tot_pop2000] , by(timefromenact2 treat)
@@ -89,7 +89,7 @@ preserve
 	
 	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
 			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
-			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			, xline(-0.5) ylabel(, grid) ytitle("residualized crime rate") ///
 			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
 			
 	graph export "$path/out/crime_rate_levels_eventstudy.pdf", replace
@@ -103,7 +103,7 @@ preserve
 	
 	keep if inrange(year,2006,2016)
 	
-	areg codtot_c1_i_rate i.treat i.time_quarter [pweight=tot_pop2000] , a(fips)
+	areg codtot_c1_i_rate_w i.treat i.time_quarter [pweight=tot_pop2000] , a(fips)
 	predict res_codtot_c1_i_rate, residuals
 
 	collapse res_codtot_c1_i_rate [pweight=tot_pop2000] , by(timefromenact2 treat)
@@ -113,7 +113,7 @@ preserve
 	
 	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
 			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
-			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			, xline(-0.5) ylabel(, grid) ytitle("residualized crime rate") ///
 			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
 			
 	graph export "$path/out/crime_rate_levels_eventstudy_countyFE.pdf", replace
@@ -127,7 +127,7 @@ preserve
 	
 	keep if inrange(year,2006,2016)
 	
-	reg codtot_c1_i_rate_dt i.treat i.time_quarter [pweight=tot_pop2000] 
+	reg codtot_c1_i_rate_w_dt i.treat i.time_quarter [pweight=tot_pop2000] 
 	predict res_codtot_c1_i_rate, residuals
 
 	collapse res_codtot_c1_i_rate [pweight=tot_pop2000] , by(timefromenact2 treat)
@@ -136,7 +136,7 @@ preserve
 
 	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
 			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
-			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			, xline(-0.5) ylabel(, grid) ytitle("residualized crime rate") ///
 			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
 	
 	graph export "$path/out/crime_rate_levels_eventstudy_nopretrends.pdf", replace
@@ -161,7 +161,7 @@ preserve
 	
 	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
 			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
-			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			, xline(-0.5) ylabel(, grid) ytitle("residualized crime rate") ///
 			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
 			
 	graph export "$path/out/crime_rate_levels_eventstudy_nopretrends_countyFE.pdf", replace
@@ -188,7 +188,7 @@ preserve
 	
 	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
 			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
-			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			, xline(-0.5) ylabel(, grid) ytitle("residualized crime rate") ///
 			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
 			
 	graph export "$path/out/crime_rate_levels_eventstudy_pre2015.pdf", replace
@@ -212,7 +212,7 @@ preserve
 	
 	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
 			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
-			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			, xline(-0.5) ylabel(, grid) ytitle("residualized crime rate") ///
 			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
 			
 	graph export "$path/out/crime_rate_levels_eventstudy_countyFE_pre2015.pdf", replace
@@ -235,7 +235,7 @@ preserve
 
 	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
 			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
-			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			, xline(-0.5) ylabel(, grid) ytitle("residualized crime rate") ///
 			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
 	
 	graph export "$path/out/crime_rate_levels_eventstudy_nopretrends_pre2015.pdf", replace
@@ -260,7 +260,7 @@ preserve
 	
 	twoway (connect res_codtot_c1_i_rate timefromenact2 if treat==1,  lc(black) lw(medthick) mc(black) ms(O)) ///
 			(connect res_codtot_c1_i_rate timefromenact2 if treat==0, lc(gray) lp(dash) lw(medthick) mc(gray) ms(D)) ///
-			, xline(0) ylabel(, grid) ytitle("residualized crime rate") ///
+			, xline(-0.5) ylabel(, grid) ytitle("residualized crime rate") ///
 			xtitle("quarters to policy") legend(order(1 "policy" 2 "bordering"))
 			
 	graph export "$path/out/crime_rate_levels_eventstudy_nopretrends_countyFE_pre2015.pdf", replace
