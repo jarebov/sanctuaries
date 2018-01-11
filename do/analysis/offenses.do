@@ -104,7 +104,7 @@ disp _b[treat_post]/_se[treat_post]
 disp e(N)
 
 esttab	t1 t2 t3 t4 using "$tab/logcrime_dd1.tex"	///
-		, b(4) se(4) unstack nonote label replace se keep(treat_post) indicate("County FE = *county*" "Time FE = *year*" "Controls = urate" "Trends = trend") ///
+		, b(4) se(4) unstack nonote label replace se keep(treat_post) indicate("County FE = *county*" "Time FE = *time*" "Controls = urate" "Trends = trend") ///
 		nomti obslast star(* 0.10 ** 0.05 *** 0.01) 
 
 
@@ -130,7 +130,7 @@ disp _b[treat_post]/_se[treat_post]
 disp e(N)
 
 esttab	t1 t2 t3 t4 using "$tab/logcrime_dd2.tex"	///
-		, b(4) se(4) unstack nonote label replace se keep(treat_post) indicate("County FE = *fips*" "Group-by-year FE = *Gr*" "Time FE = *year*" "Controls = urate" "Trends = trend") ///
+		, b(4) se(4) unstack nonote label replace se keep(treat_post) indicate("County FE = *fips*" "Group-by-time FE = *Gr*" "Time FE = *time*" "Controls = urate" "Trends = trend") ///
 		nomti obslast star(* 0.10 ** 0.05 *** 0.01) 
 
 		
