@@ -1,0 +1,24 @@
+{
+\def\sym#1{\ifmmode^{#1}\else\(^{#1}\)\fi}
+\begin{tabular}{l*{7}{c}}
+\hline\hline
+                    &\multicolumn{1}{c}{Murder}&\multicolumn{1}{c}{Rape}&\multicolumn{1}{c}{Robbery}&\multicolumn{1}{c}{Assault}&\multicolumn{1}{c}{Burglary}&\multicolumn{1}{c}{Larceny}&\multicolumn{1}{c}{Auto Theft}\\\cmidrule(lr){2-2}\cmidrule(lr){3-3}\cmidrule(lr){4-4}\cmidrule(lr){5-5}\cmidrule(lr){6-6}\cmidrule(lr){7-7}\cmidrule(lr){8-8}
+                    &\multicolumn{1}{c}{(1)}         &\multicolumn{1}{c}{(2)}         &\multicolumn{1}{c}{(3)}         &\multicolumn{1}{c}{(4)}         &\multicolumn{1}{c}{(5)}         &\multicolumn{1}{c}{(6)}         &\multicolumn{1}{c}{(7)}         \\
+\hline
+no-detainer $\times$ post&      0.0785         &     -0.0327         &      0.0075         &      0.0244         &      0.0290         &      0.0482\sym{***}&      0.0714\sym{**} \\
+                    &    (0.0582)         &    (0.0478)         &    (0.0242)         &    (0.0177)         &    (0.0211)         &    (0.0179)         &    (0.0334)         \\
+[1em]
+County FE           &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+[1em]
+Group-by-time FE    &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+[1em]
+Time FE             &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+[1em]
+Controls            &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+[1em]
+Trends              &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         &         Yes         \\
+\hline
+Observations        &        2859         &        5061         &        4658         &        6057         &        6014         &        6088         &        5416         \\
+\hline\hline
+\end{tabular}
+}
