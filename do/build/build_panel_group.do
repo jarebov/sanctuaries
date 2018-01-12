@@ -11,7 +11,7 @@
 clear all
 set more off
 
-global user = 1 // 1 Jaime, 2 Barbara
+global user = 2 // 1 Jaime, 2 Barbara
 
 if $user == 1{
 cd "/Users/JAIME/Dropbox/research/sanctuaries/data/output_datasets"
@@ -264,6 +264,32 @@ local todetrend = "lcodtot_c1_i_rate codtot_c1_i_rate lcodtot_c1_i_rate_w codtot
 
 foreach v of varlist `todetrend'{
 	qui reg `v' c.time_quarter#i.unit_num i.quarter if pre2==1 [pweight=tot_pop2000]
+	qui distinct unit_num if e(sample)
+	local units = r(ndistinct) //local with distinct number of units
+	mat b`v'=e(b)
+	mat t`v'=b`v'[1,1..`units']
+	mat score `v'FIT = t`v'
+	gen `v'_dt = `v' - `v'FIT
+	drop `v'FIT
+}
+
+local todetrend = "cod1_c1_i_rate lcod1_c1_i_rate cod3_c1_i_rate lcod3_c1_i_rate cod6_c1_i_rate lcod6_c1_i_rate cod11_c1_i_rate lcod11_c1_i_rate cod17_c1_i_rate lcod17_c1_i_rate cod21_c1_i_rate lcod21_c1_i_rate cod23_c1_i_rate lcod23_c1_i_rate"
+foreach v of varlist `todetrend'{
+	qui reg `v' c.time_quarter#i.unit_num i.quarter if pre2==1 [pweight=tot_pop2000]
+	qui distinct unit_num if e(sample)
+	local units = r(ndistinct) //local with distinct number of units
+	mat b`v'=e(b)
+	mat t`v'=b`v'[1,1..`units']
+	mat score `v'FIT = t`v'
+	gen `v'_dt = `v' - `v'FIT
+	drop `v'FIT
+}
+
+local todetrend = "cod1_c1_i_rate_w lcod1_c1_i_rate_w cod3_c1_i_rate_w lcod3_c1_i_rate_w cod6_c1_i_rate_w lcod6_c1_i_rate_w cod11_c1_i_rate_w lcod11_c1_i_rate_w cod17_c1_i_rate_w lcod17_c1_i_rate_w cod21_c1_i_rate_w lcod21_c1_i_rate_w cod23_c1_i_rate_w lcod23_c1_i_rate_w"
+foreach v of varlist `todetrend'{
+	qui reg `v' c.time_quarter#i.unit_num i.quarter if pre2==1 [pweight=tot_pop2000]
+	qui distinct unit_num if e(sample)
+	local units = r(ndistinct) //local with distinct number of units
 	mat b`v'=e(b)
 	mat t`v'=b`v'[1,1..`units']
 	mat score `v'FIT = t`v'

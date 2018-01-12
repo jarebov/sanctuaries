@@ -607,6 +607,44 @@ drop _merge
 	replace codviolent_c1_i = (codviolent_c1_i[_n-7]+codviolent_c1_i[_n+3])/2 if fips==41067 & time==tm(2015m10)
 	replace codviolent_c1_i = (codviolent_c1_i[_n-8]+codviolent_c1_i[_n+2])/2 if fips==41067 & time==tm(2015m11)
 	replace codviolent_c1_i = (codviolent_c1_i[_n-9]+codviolent_c1_i[_n+1])/2 if fips==41067 & time==tm(2015m12)
+	
+	
+	
+	*NONVIOLENT CRIME*
+	
+	/*county 35028: 2009 q3, q4 missing. Also missing 2013 q2 Interpolate */
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-1]+codnonviolent_c1_i[_n+6])/2 if fips==35028 & time==tm(2009m7)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-2]+codnonviolent_c1_i[_n+5])/2 if fips==35028 & time==tm(2009m8)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-3]+codnonviolent_c1_i[_n+4])/2 if fips==35028 & time==tm(2009m9)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-4]+codnonviolent_c1_i[_n+3])/2 if fips==35028 & time==tm(2009m10)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-5]+codnonviolent_c1_i[_n+2])/2 if fips==35028 & time==tm(2009m11)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-6]+codnonviolent_c1_i[_n+1])/2 if fips==35028 & time==tm(2009m12)
+	
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-1]+codnonviolent_c1_i[_n+6])/2 if fips==35028 & time==tm(2013m4)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-2]+codnonviolent_c1_i[_n+5])/2 if fips==35028 & time==tm(2013m5)	
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-3]+codnonviolent_c1_i[_n+4])/2 if fips==35028 & time==tm(2013m6)
+	
+	/*county 41051: 2015 q2, q3, q4 missing. Interpolate */
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-1]+codnonviolent_c1_i[_n+9])/2 if fips==41051 & time==tm(2015m4)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-2]+codnonviolent_c1_i[_n+8])/2 if fips==41051 & time==tm(2015m5)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-3]+codnonviolent_c1_i[_n+7])/2 if fips==41051 & time==tm(2015m6)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-4]+codnonviolent_c1_i[_n+6])/2 if fips==41051 & time==tm(2015m7)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-5]+codnonviolent_c1_i[_n+5])/2 if fips==41051 & time==tm(2015m8)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-6]+codnonviolent_c1_i[_n+4])/2 if fips==41051 & time==tm(2015m9)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-7]+codnonviolent_c1_i[_n+3])/2 if fips==41051 & time==tm(2015m10)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-8]+codnonviolent_c1_i[_n+2])/2 if fips==41051 & time==tm(2015m11)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-9]+codnonviolent_c1_i[_n+1])/2 if fips==41051 & time==tm(2015m12)
+	
+	/*county 41067: 2015 q2, q3, q4 missing. Interpolate */
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-1]+codnonviolent_c1_i[_n+9])/2 if fips==41067 & time==tm(2015m4)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-2]+codnonviolent_c1_i[_n+8])/2 if fips==41067 & time==tm(2015m5)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-3]+codnonviolent_c1_i[_n+7])/2 if fips==41067 & time==tm(2015m6)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-4]+codnonviolent_c1_i[_n+6])/2 if fips==41067 & time==tm(2015m7)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-5]+codnonviolent_c1_i[_n+5])/2 if fips==41067 & time==tm(2015m8)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-6]+codnonviolent_c1_i[_n+4])/2 if fips==41067 & time==tm(2015m9)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-7]+codnonviolent_c1_i[_n+3])/2 if fips==41067 & time==tm(2015m10)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-8]+codnonviolent_c1_i[_n+2])/2 if fips==41067 & time==tm(2015m11)
+	replace codnonviolent_c1_i = (codnonviolent_c1_i[_n-9]+codnonviolent_c1_i[_n+1])/2 if fips==41067 & time==tm(2015m12)	
 ************************
 
 
